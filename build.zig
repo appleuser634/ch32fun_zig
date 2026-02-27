@@ -9,6 +9,7 @@ const examples = [_]Example{
     .{ .name = "blinky", .path = "examples/blinky/main.zig" },
     .{ .name = "gpio_input", .path = "examples/gpio_input/main.zig" },
     .{ .name = "timer_irq", .path = "examples/timer_irq/main.zig" },
+    .{ .name = "oled", .path = "examples/oled/main.zig" },
 };
 
 fn resolveExample(name: []const u8) ?Example {
@@ -19,10 +20,10 @@ fn resolveExample(name: []const u8) ?Example {
 }
 
 pub fn build(b: *std.Build) void {
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.option(std.builtin.OptimizeMode, "optimize", "Optimization mode") orelse .ReleaseSmall;
     const example_name = b.option([]const u8, "example", "Example to build") orelse "blinky";
     const selected = resolveExample(example_name) orelse {
-        std.debug.print("Unknown example '{s}'. Available: blinky, gpio_input, timer_irq\n", .{example_name});
+        std.debug.print("Unknown example '{s}'. Available: blinky, gpio_input, timer_irq, oled\n", .{example_name});
         @panic("invalid example");
     };
 
