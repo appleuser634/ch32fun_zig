@@ -1,0 +1,766 @@
+
+./.zig-cache/o/f874fe4e472be5e99892baa2ef19f738/blinky:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+08000000 <debug.FullPanic((function 'defaultPanic')).integerOverflow>:
+ 8000000:	1141                	addi	sp,sp,-16
+ 8000002:	c606                	sw	ra,12(sp)
+ 8000004:	c422                	sw	s0,8(sp)
+ 8000006:	0800                	addi	s0,sp,16
+ 8000008:	fe142823          	sw	ra,-16(s0)
+ 800000c:	4585                	li	a1,1
+ 800000e:	feb40a23          	sb	a1,-12(s0)
+ 8000012:	080015b7          	lui	a1,0x8001
+ 8000016:	83a58593          	addi	a1,a1,-1990 # 800083a <__anon_2776>
+ 800001a:	4641                	li	a2,16
+ 800001c:	ff040693          	addi	a3,s0,-16
+ 8000020:	00000097          	auipc	ra,0x0
+ 8000024:	008080e7          	jalr	8(ra) # 8000028 <debug.defaultPanic>
+
+08000028 <debug.defaultPanic>:
+ 8000028:	1121                	addi	sp,sp,-24
+ 800002a:	ca06                	sw	ra,20(sp)
+ 800002c:	c822                	sw	s0,16(sp)
+ 800002e:	0820                	addi	s0,sp,24
+ 8000030:	fec42623          	sw	a2,-20(s0)
+ 8000034:	feb42423          	sw	a1,-24(s0)
+ 8000038:	fec42a23          	sw	a2,-12(s0)
+ 800003c:	feb42823          	sw	a1,-16(s0)
+	...
+
+08000042 <debug.FullPanic((function 'defaultPanic')).corruptSwitch>:
+ 8000042:	1141                	addi	sp,sp,-16
+ 8000044:	c606                	sw	ra,12(sp)
+ 8000046:	c422                	sw	s0,8(sp)
+ 8000048:	0800                	addi	s0,sp,16
+ 800004a:	fe142823          	sw	ra,-16(s0)
+ 800004e:	4585                	li	a1,1
+ 8000050:	feb40a23          	sb	a1,-12(s0)
+ 8000054:	080015b7          	lui	a1,0x8001
+ 8000058:	84b58593          	addi	a1,a1,-1973 # 800084b <__anon_5636>
+ 800005c:	465d                	li	a2,23
+ 800005e:	ff040693          	addi	a3,s0,-16
+ 8000062:	00000097          	auipc	ra,0x0
+ 8000066:	fc6080e7          	jalr	-58(ra) # 8000028 <debug.defaultPanic>
+
+0800006a <_start>:
+ 800006a:	f6c10113          	addi	sp,sp,-148
+ 800006e:	c906                	sw	ra,144(sp)
+ 8000070:	c722                	sw	s0,140(sp)
+ 8000072:	0940                	addi	s0,sp,148
+ 8000074:	02000513          	li	a0,32
+ 8000078:	fea42a23          	sw	a0,-12(s0)
+ 800007c:	f6c40513          	addi	a0,s0,-148
+ 8000080:	fea42823          	sw	a0,-16(s0)
+ 8000084:	4501                	li	a0,0
+ 8000086:	fea42623          	sw	a0,-20(s0)
+ 800008a:	fec40513          	addi	a0,s0,-20
+ 800008e:	00000097          	auipc	ra,0x0
+ 8000092:	008080e7          	jalr	8(ra) # 8000096 <main.main>
+
+08000096 <main.main>:
+ 8000096:	1141                	addi	sp,sp,-16
+ 8000098:	c606                	sw	ra,12(sp)
+ 800009a:	c422                	sw	s0,8(sp)
+ 800009c:	0800                	addi	s0,sp,16
+ 800009e:	fea42823          	sw	a0,-16(s0)
+ 80000a2:	080015b7          	lui	a1,0x8001
+ 80000a6:	86458593          	addi	a1,a1,-1948 # 8000864 <__anon_5636+0x19>
+ 80000aa:	00000097          	auipc	ra,0x0
+ 80000ae:	06a080e7          	jalr	106(ra) # 8000114 <system.system.init>
+ 80000b2:	ff042503          	lw	a0,-16(s0)
+ 80000b6:	00000097          	auipc	ra,0x0
+ 80000ba:	160080e7          	jalr	352(ra) # 8000216 <hal.gpio.enableAllClocks>
+ 80000be:	ff042583          	lw	a1,-16(s0)
+ 80000c2:	ff440513          	addi	a0,s0,-12
+ 80000c6:	00000097          	auipc	ra,0x0
+ 80000ca:	17c080e7          	jalr	380(ra) # 8000242 <hal.gpio.pin__anon_8047>
+ 80000ce:	ff042503          	lw	a0,-16(s0)
+ 80000d2:	ff544583          	lbu	a1,-11(s0)
+ 80000d6:	05a2                	slli	a1,a1,0x8
+ 80000d8:	ff444603          	lbu	a2,-12(s0)
+ 80000dc:	8dd1                	or	a1,a1,a2
+ 80000de:	feb41b23          	sh	a1,-10(s0)
+ 80000e2:	ff640593          	addi	a1,s0,-10
+ 80000e6:	4605                	li	a2,1
+ 80000e8:	00000097          	auipc	ra,0x0
+ 80000ec:	178080e7          	jalr	376(ra) # 8000260 <hal.gpio.Pin.configure>
+ 80000f0:	a009                	j	80000f2 <main.main+0x5c>
+ 80000f2:	ff042503          	lw	a0,-16(s0)
+ 80000f6:	ff640593          	addi	a1,s0,-10
+ 80000fa:	00000097          	auipc	ra,0x0
+ 80000fe:	212080e7          	jalr	530(ra) # 800030c <hal.gpio.Pin.toggle>
+ 8000102:	ff042503          	lw	a0,-16(s0)
+ 8000106:	0fa00593          	li	a1,250
+ 800010a:	00000097          	auipc	ra,0x0
+ 800010e:	250080e7          	jalr	592(ra) # 800035a <hal.time.delayMs>
+ 8000112:	b7c5                	j	80000f2 <main.main+0x5c>
+
+08000114 <system.system.init>:
+ 8000114:	fd410113          	addi	sp,sp,-44
+ 8000118:	d406                	sw	ra,40(sp)
+ 800011a:	d222                	sw	s0,36(sp)
+ 800011c:	1060                	addi	s0,sp,44
+ 800011e:	fca42a23          	sw	a0,-44(s0)
+ 8000122:	418c                	lw	a1,0(a1)
+ 8000124:	20000637          	lui	a2,0x20000
+ 8000128:	00b62023          	sw	a1,0(a2) # 20000000 <system.system.core_clock_hz>
+ 800012c:	00000097          	auipc	ra,0x0
+ 8000130:	2da080e7          	jalr	730(ra) # 8000406 <periph.registers.rcc>
+ 8000134:	85aa                	mv	a1,a0
+ 8000136:	fd442503          	lw	a0,-44(s0)
+ 800013a:	862e                	mv	a2,a1
+ 800013c:	fcc42c23          	sw	a2,-40(s0)
+ 8000140:	feb42023          	sw	a1,-32(s0)
+ 8000144:	feb42223          	sw	a1,-28(s0)
+ 8000148:	00000097          	auipc	ra,0x0
+ 800014c:	2d2080e7          	jalr	722(ra) # 800041a <periph.registers.flash>
+ 8000150:	85aa                	mv	a1,a0
+ 8000152:	fcb42e23          	sw	a1,-36(s0)
+ 8000156:	fea42423          	sw	a0,-24(s0)
+ 800015a:	fea42623          	sw	a0,-20(s0)
+ 800015e:	1ffff537          	lui	a0,0x1ffff
+ 8000162:	7d450593          	addi	a1,a0,2004 # 1ffff7d4 <_sidata+0x17ffef6c>
+ 8000166:	feb42823          	sw	a1,-16(s0)
+ 800016a:	7d454503          	lbu	a0,2004(a0)
+ 800016e:	0ff00593          	li	a1,255
+ 8000172:	02b51b63          	bne	a0,a1,80001a8 <system.system.init+0x94>
+ 8000176:	a899                	j	80001cc <system.system.init+0xb8>
+ 8000178:	fdc42503          	lw	a0,-36(s0)
+ 800017c:	fe842583          	lw	a1,-24(s0)
+ 8000180:	4108                	lw	a0,0(a0)
+ 8000182:	9971                	andi	a0,a0,-4
+ 8000184:	0505                	addi	a0,a0,1
+ 8000186:	c188                	sw	a0,0(a1)
+ 8000188:	fe042583          	lw	a1,-32(s0)
+ 800018c:	41c8                	lw	a0,4(a1)
+ 800018e:	7641                	lui	a2,0xffff0
+ 8000190:	f0c60613          	addi	a2,a2,-244 # fffeff0c <_ebss+0xdffeff08>
+ 8000194:	8d71                	and	a0,a0,a2
+ 8000196:	c1c8                	sw	a0,4(a1)
+ 8000198:	fe042583          	lw	a1,-32(s0)
+ 800019c:	4188                	lw	a0,0(a1)
+ 800019e:	01000637          	lui	a2,0x1000
+ 80001a2:	8d51                	or	a0,a0,a2
+ 80001a4:	c188                	sw	a0,0(a1)
+ 80001a6:	a82d                	j	80001e0 <system.system.init+0xcc>
+ 80001a8:	fd842503          	lw	a0,-40(s0)
+ 80001ac:	4108                	lw	a0,0(a0)
+ 80001ae:	fea42a23          	sw	a0,-12(s0)
+ 80001b2:	fe042583          	lw	a1,-32(s0)
+ 80001b6:	f0757513          	andi	a0,a0,-249
+ 80001ba:	1ffff637          	lui	a2,0x1ffff
+ 80001be:	7d464603          	lbu	a2,2004(a2) # 1ffff7d4 <_sidata+0x17ffef6c>
+ 80001c2:	8a7d                	andi	a2,a2,31
+ 80001c4:	060e                	slli	a2,a2,0x3
+ 80001c6:	8d51                	or	a0,a0,a2
+ 80001c8:	c188                	sw	a0,0(a1)
+ 80001ca:	b77d                	j	8000178 <system.system.init+0x64>
+ 80001cc:	b775                	j	8000178 <system.system.init+0x64>
+ 80001ce:	fd842503          	lw	a0,-40(s0)
+ 80001d2:	fe042583          	lw	a1,-32(s0)
+ 80001d6:	4148                	lw	a0,4(a0)
+ 80001d8:	9971                	andi	a0,a0,-4
+ 80001da:	0509                	addi	a0,a0,2
+ 80001dc:	c1c8                	sw	a0,4(a1)
+ 80001de:	a005                	j	80001fe <system.system.init+0xea>
+ 80001e0:	fd842503          	lw	a0,-40(s0)
+ 80001e4:	4108                	lw	a0,0(a0)
+ 80001e6:	051a                	slli	a0,a0,0x6
+ 80001e8:	00055463          	bgez	a0,80001f0 <system.system.init+0xdc>
+ 80001ec:	a019                	j	80001f2 <system.system.init+0xde>
+ 80001ee:	bfcd                	j	80001e0 <system.system.init+0xcc>
+ 80001f0:	bffd                	j	80001ee <system.system.init+0xda>
+ 80001f2:	bff1                	j	80001ce <system.system.init+0xba>
+ 80001f4:	50a2                	lw	ra,40(sp)
+ 80001f6:	5412                	lw	s0,36(sp)
+ 80001f8:	02c10113          	addi	sp,sp,44
+ 80001fc:	8082                	ret
+ 80001fe:	fd842503          	lw	a0,-40(s0)
+ 8000202:	4148                	lw	a0,4(a0)
+ 8000204:	0572                	slli	a0,a0,0x1c
+ 8000206:	8179                	srli	a0,a0,0x1e
+ 8000208:	4589                	li	a1,2
+ 800020a:	00b51463          	bne	a0,a1,8000212 <system.system.init+0xfe>
+ 800020e:	a019                	j	8000214 <system.system.init+0x100>
+ 8000210:	b7fd                	j	80001fe <system.system.init+0xea>
+ 8000212:	bffd                	j	8000210 <system.system.init+0xfc>
+ 8000214:	b7c5                	j	80001f4 <system.system.init+0xe0>
+
+08000216 <hal.gpio.enableAllClocks>:
+ 8000216:	1141                	addi	sp,sp,-16
+ 8000218:	c606                	sw	ra,12(sp)
+ 800021a:	c422                	sw	s0,8(sp)
+ 800021c:	0800                	addi	s0,sp,16
+ 800021e:	00000097          	auipc	ra,0x0
+ 8000222:	1e8080e7          	jalr	488(ra) # 8000406 <periph.registers.rcc>
+ 8000226:	fea42823          	sw	a0,-16(s0)
+ 800022a:	fea42a23          	sw	a0,-12(s0)
+ 800022e:	ff042583          	lw	a1,-16(s0)
+ 8000232:	4d88                	lw	a0,24(a1)
+ 8000234:	03556513          	ori	a0,a0,53
+ 8000238:	cd88                	sw	a0,24(a1)
+ 800023a:	40b2                	lw	ra,12(sp)
+ 800023c:	4422                	lw	s0,8(sp)
+ 800023e:	0141                	addi	sp,sp,16
+ 8000240:	8082                	ret
+
+08000242 <hal.gpio.pin__anon_8047>:
+ 8000242:	1161                	addi	sp,sp,-8
+ 8000244:	c206                	sw	ra,4(sp)
+ 8000246:	c022                	sw	s0,0(sp)
+ 8000248:	0020                	addi	s0,sp,8
+ 800024a:	85aa                	mv	a1,a0
+ 800024c:	4509                	li	a0,2
+ 800024e:	00a58023          	sb	a0,0(a1)
+ 8000252:	4501                	li	a0,0
+ 8000254:	00a580a3          	sb	a0,1(a1)
+ 8000258:	4092                	lw	ra,4(sp)
+ 800025a:	4402                	lw	s0,0(sp)
+ 800025c:	0121                	addi	sp,sp,8
+ 800025e:	8082                	ret
+
+08000260 <hal.gpio.Pin.configure>:
+ 8000260:	fcc10113          	addi	sp,sp,-52
+ 8000264:	d806                	sw	ra,48(sp)
+ 8000266:	d622                	sw	s0,44(sp)
+ 8000268:	1840                	addi	s0,sp,52
+ 800026a:	fcb42a23          	sw	a1,-44(s0)
+ 800026e:	fca42623          	sw	a0,-52(s0)
+ 8000272:	86b2                	mv	a3,a2
+ 8000274:	fcd42823          	sw	a3,-48(s0)
+ 8000278:	8a3d                	andi	a2,a2,15
+ 800027a:	fec400a3          	sb	a2,-31(s0)
+ 800027e:	0005c603          	lbu	a2,0(a1)
+ 8000282:	0015c583          	lbu	a1,1(a1)
+ 8000286:	05a2                	slli	a1,a1,0x8
+ 8000288:	8dd1                	or	a1,a1,a2
+ 800028a:	feb41123          	sh	a1,-30(s0)
+ 800028e:	fe240593          	addi	a1,s0,-30
+ 8000292:	00000097          	auipc	ra,0x0
+ 8000296:	19c080e7          	jalr	412(ra) # 800042e <hal.gpio.Pin.gpio>
+ 800029a:	fd442583          	lw	a1,-44(s0)
+ 800029e:	862a                	mv	a2,a0
+ 80002a0:	fcc42c23          	sw	a2,-40(s0)
+ 80002a4:	fea42223          	sw	a0,-28(s0)
+ 80002a8:	fea42423          	sw	a0,-24(s0)
+ 80002ac:	0015c503          	lbu	a0,1(a1)
+ 80002b0:	893d                	andi	a0,a0,15
+ 80002b2:	050a                	slli	a0,a0,0x2
+ 80002b4:	fca42e23          	sw	a0,-36(s0)
+ 80002b8:	8115                	srli	a0,a0,0x5
+ 80002ba:	c901                	beqz	a0,80002ca <hal.gpio.Pin.configure+0x6a>
+ 80002bc:	a009                	j	80002be <hal.gpio.Pin.configure+0x5e>
+ 80002be:	fcc42503          	lw	a0,-52(s0)
+ 80002c2:	00000097          	auipc	ra,0x0
+ 80002c6:	d3e080e7          	jalr	-706(ra) # 8000000 <debug.FullPanic((function 'defaultPanic')).integerOverflow>
+ 80002ca:	fd842503          	lw	a0,-40(s0)
+ 80002ce:	fdc42603          	lw	a2,-36(s0)
+ 80002d2:	fd042583          	lw	a1,-48(s0)
+ 80002d6:	01f67693          	andi	a3,a2,31
+ 80002da:	fed407a3          	sb	a3,-17(s0)
+ 80002de:	46bd                	li	a3,15
+ 80002e0:	00c696b3          	sll	a3,a3,a2
+ 80002e4:	fed42823          	sw	a3,-16(s0)
+ 80002e8:	89bd                	andi	a1,a1,15
+ 80002ea:	00c59633          	sll	a2,a1,a2
+ 80002ee:	fec42a23          	sw	a2,-12(s0)
+ 80002f2:	fe442583          	lw	a1,-28(s0)
+ 80002f6:	4108                	lw	a0,0(a0)
+ 80002f8:	fff6c693          	not	a3,a3
+ 80002fc:	8d75                	and	a0,a0,a3
+ 80002fe:	8d51                	or	a0,a0,a2
+ 8000300:	c188                	sw	a0,0(a1)
+ 8000302:	50c2                	lw	ra,48(sp)
+ 8000304:	5432                	lw	s0,44(sp)
+ 8000306:	03410113          	addi	sp,sp,52
+ 800030a:	8082                	ret
+
+0800030c <hal.gpio.Pin.toggle>:
+ 800030c:	1141                	addi	sp,sp,-16
+ 800030e:	c606                	sw	ra,12(sp)
+ 8000310:	c422                	sw	s0,8(sp)
+ 8000312:	0800                	addi	s0,sp,16
+ 8000314:	fea42823          	sw	a0,-16(s0)
+ 8000318:	0005c603          	lbu	a2,0(a1)
+ 800031c:	0015c583          	lbu	a1,1(a1)
+ 8000320:	05a2                	slli	a1,a1,0x8
+ 8000322:	8dd1                	or	a1,a1,a2
+ 8000324:	feb41a23          	sh	a1,-12(s0)
+ 8000328:	ff441583          	lh	a1,-12(s0)
+ 800032c:	feb41b23          	sh	a1,-10(s0)
+ 8000330:	ff440593          	addi	a1,s0,-12
+ 8000334:	00000097          	auipc	ra,0x0
+ 8000338:	17e080e7          	jalr	382(ra) # 80004b2 <hal.gpio.Pin.readOut>
+ 800033c:	85aa                	mv	a1,a0
+ 800033e:	ff042503          	lw	a0,-16(s0)
+ 8000342:	0015c613          	xori	a2,a1,1
+ 8000346:	ff640593          	addi	a1,s0,-10
+ 800034a:	00000097          	auipc	ra,0x0
+ 800034e:	1ae080e7          	jalr	430(ra) # 80004f8 <hal.gpio.Pin.write>
+ 8000352:	40b2                	lw	ra,12(sp)
+ 8000354:	4422                	lw	s0,8(sp)
+ 8000356:	0141                	addi	sp,sp,16
+ 8000358:	8082                	ret
+
+0800035a <hal.time.delayMs>:
+ 800035a:	fd410113          	addi	sp,sp,-44
+ 800035e:	d406                	sw	ra,40(sp)
+ 8000360:	d222                	sw	s0,36(sp)
+ 8000362:	1060                	addi	s0,sp,44
+ 8000364:	feb42023          	sw	a1,-32(s0)
+ 8000368:	fca42e23          	sw	a0,-36(s0)
+ 800036c:	feb42423          	sw	a1,-24(s0)
+ 8000370:	20000537          	lui	a0,0x20000
+ 8000374:	00052503          	lw	a0,0(a0) # 20000000 <system.system.core_clock_hz>
+ 8000378:	3e800593          	li	a1,1000
+ 800037c:	00000097          	auipc	ra,0x0
+ 8000380:	25c080e7          	jalr	604(ra) # 80005d8 <__udivsi3>
+ 8000384:	862a                	mv	a2,a0
+ 8000386:	fe042503          	lw	a0,-32(s0)
+ 800038a:	fec42623          	sw	a2,-20(s0)
+ 800038e:	4681                	li	a3,0
+ 8000390:	85b6                	mv	a1,a3
+ 8000392:	00000097          	auipc	ra,0x0
+ 8000396:	3b4080e7          	jalr	948(ra) # 8000746 <__muldi3>
+ 800039a:	00b03633          	snez	a2,a1
+ 800039e:	fea42223          	sw	a0,-28(s0)
+ 80003a2:	c981                	beqz	a1,80003b2 <hal.time.delayMs+0x58>
+ 80003a4:	a009                	j	80003a6 <hal.time.delayMs+0x4c>
+ 80003a6:	fdc42503          	lw	a0,-36(s0)
+ 80003aa:	00000097          	auipc	ra,0x0
+ 80003ae:	c56080e7          	jalr	-938(ra) # 8000000 <debug.FullPanic((function 'defaultPanic')).integerOverflow>
+ 80003b2:	fdc42503          	lw	a0,-36(s0)
+ 80003b6:	fe442583          	lw	a1,-28(s0)
+ 80003ba:	862e                	mv	a2,a1
+ 80003bc:	fcc42a23          	sw	a2,-44(s0)
+ 80003c0:	feb42823          	sw	a1,-16(s0)
+ 80003c4:	00000097          	auipc	ra,0x0
+ 80003c8:	1bc080e7          	jalr	444(ra) # 8000580 <periph.registers.systick>
+ 80003cc:	4508                	lw	a0,8(a0)
+ 80003ce:	fca42c23          	sw	a0,-40(s0)
+ 80003d2:	fea42a23          	sw	a0,-12(s0)
+ 80003d6:	a031                	j	80003e2 <hal.time.delayMs+0x88>
+ 80003d8:	50a2                	lw	ra,40(sp)
+ 80003da:	5412                	lw	s0,36(sp)
+ 80003dc:	02c10113          	addi	sp,sp,44
+ 80003e0:	8082                	ret
+ 80003e2:	fdc42503          	lw	a0,-36(s0)
+ 80003e6:	00000097          	auipc	ra,0x0
+ 80003ea:	19a080e7          	jalr	410(ra) # 8000580 <periph.registers.systick>
+ 80003ee:	fd842603          	lw	a2,-40(s0)
+ 80003f2:	fd442583          	lw	a1,-44(s0)
+ 80003f6:	4508                	lw	a0,8(a0)
+ 80003f8:	8d11                	sub	a0,a0,a2
+ 80003fa:	00b56463          	bltu	a0,a1,8000402 <hal.time.delayMs+0xa8>
+ 80003fe:	a019                	j	8000404 <hal.time.delayMs+0xaa>
+ 8000400:	b7cd                	j	80003e2 <hal.time.delayMs+0x88>
+ 8000402:	bffd                	j	8000400 <hal.time.delayMs+0xa6>
+ 8000404:	bfd1                	j	80003d8 <hal.time.delayMs+0x7e>
+
+08000406 <periph.registers.rcc>:
+ 8000406:	1161                	addi	sp,sp,-8
+ 8000408:	c206                	sw	ra,4(sp)
+ 800040a:	c022                	sw	s0,0(sp)
+ 800040c:	0020                	addi	s0,sp,8
+ 800040e:	40021537          	lui	a0,0x40021
+ 8000412:	4092                	lw	ra,4(sp)
+ 8000414:	4402                	lw	s0,0(sp)
+ 8000416:	0121                	addi	sp,sp,8
+ 8000418:	8082                	ret
+
+0800041a <periph.registers.flash>:
+ 800041a:	1161                	addi	sp,sp,-8
+ 800041c:	c206                	sw	ra,4(sp)
+ 800041e:	c022                	sw	s0,0(sp)
+ 8000420:	0020                	addi	s0,sp,8
+ 8000422:	40022537          	lui	a0,0x40022
+ 8000426:	4092                	lw	ra,4(sp)
+ 8000428:	4402                	lw	s0,0(sp)
+ 800042a:	0121                	addi	sp,sp,8
+ 800042c:	8082                	ret
+
+0800042e <hal.gpio.Pin.gpio>:
+ 800042e:	1131                	addi	sp,sp,-20
+ 8000430:	c806                	sw	ra,16(sp)
+ 8000432:	c622                	sw	s0,12(sp)
+ 8000434:	0840                	addi	s0,sp,20
+ 8000436:	fea42823          	sw	a0,-16(s0)
+ 800043a:	0005c503          	lbu	a0,0(a1)
+ 800043e:	fea42a23          	sw	a0,-12(s0)
+ 8000442:	890d                	andi	a0,a0,3
+ 8000444:	4589                	li	a1,2
+ 8000446:	04b50763          	beq	a0,a1,8000494 <hal.gpio.Pin.gpio+0x66>
+ 800044a:	a009                	j	800044c <hal.gpio.Pin.gpio+0x1e>
+ 800044c:	ff442503          	lw	a0,-12(s0)
+ 8000450:	890d                	andi	a0,a0,3
+ 8000452:	cd19                	beqz	a0,8000470 <hal.gpio.Pin.gpio+0x42>
+ 8000454:	a009                	j	8000456 <hal.gpio.Pin.gpio+0x28>
+ 8000456:	ff442503          	lw	a0,-12(s0)
+ 800045a:	890d                	andi	a0,a0,3
+ 800045c:	4585                	li	a1,1
+ 800045e:	02b50263          	beq	a0,a1,8000482 <hal.gpio.Pin.gpio+0x54>
+ 8000462:	a091                	j	80004a6 <hal.gpio.Pin.gpio+0x78>
+ 8000464:	fec42503          	lw	a0,-20(s0)
+ 8000468:	40c2                	lw	ra,16(sp)
+ 800046a:	4432                	lw	s0,12(sp)
+ 800046c:	0151                	addi	sp,sp,20
+ 800046e:	8082                	ret
+ 8000470:	ff042503          	lw	a0,-16(s0)
+ 8000474:	00000097          	auipc	ra,0x0
+ 8000478:	120080e7          	jalr	288(ra) # 8000594 <periph.registers.gpioA>
+ 800047c:	fea42623          	sw	a0,-20(s0)
+ 8000480:	b7d5                	j	8000464 <hal.gpio.Pin.gpio+0x36>
+ 8000482:	ff042503          	lw	a0,-16(s0)
+ 8000486:	00000097          	auipc	ra,0x0
+ 800048a:	126080e7          	jalr	294(ra) # 80005ac <periph.registers.gpioC>
+ 800048e:	fea42623          	sw	a0,-20(s0)
+ 8000492:	bfc9                	j	8000464 <hal.gpio.Pin.gpio+0x36>
+ 8000494:	ff042503          	lw	a0,-16(s0)
+ 8000498:	00000097          	auipc	ra,0x0
+ 800049c:	128080e7          	jalr	296(ra) # 80005c0 <periph.registers.gpioD>
+ 80004a0:	fea42623          	sw	a0,-20(s0)
+ 80004a4:	b7c1                	j	8000464 <hal.gpio.Pin.gpio+0x36>
+ 80004a6:	ff042503          	lw	a0,-16(s0)
+ 80004aa:	00000097          	auipc	ra,0x0
+ 80004ae:	b98080e7          	jalr	-1128(ra) # 8000042 <debug.FullPanic((function 'defaultPanic')).corruptSwitch>
+
+080004b2 <hal.gpio.Pin.readOut>:
+ 80004b2:	1131                	addi	sp,sp,-20
+ 80004b4:	c806                	sw	ra,16(sp)
+ 80004b6:	c622                	sw	s0,12(sp)
+ 80004b8:	0840                	addi	s0,sp,20
+ 80004ba:	feb42623          	sw	a1,-20(s0)
+ 80004be:	0005c603          	lbu	a2,0(a1)
+ 80004c2:	0015c583          	lbu	a1,1(a1)
+ 80004c6:	05a2                	slli	a1,a1,0x8
+ 80004c8:	8dd1                	or	a1,a1,a2
+ 80004ca:	feb41923          	sh	a1,-14(s0)
+ 80004ce:	ff240593          	addi	a1,s0,-14
+ 80004d2:	00000097          	auipc	ra,0x0
+ 80004d6:	f5c080e7          	jalr	-164(ra) # 800042e <hal.gpio.Pin.gpio>
+ 80004da:	fec42583          	lw	a1,-20(s0)
+ 80004de:	fea42a23          	sw	a0,-12(s0)
+ 80004e2:	4548                	lw	a0,12(a0)
+ 80004e4:	0015c583          	lbu	a1,1(a1)
+ 80004e8:	89bd                	andi	a1,a1,15
+ 80004ea:	00b55533          	srl	a0,a0,a1
+ 80004ee:	8905                	andi	a0,a0,1
+ 80004f0:	40c2                	lw	ra,16(sp)
+ 80004f2:	4432                	lw	s0,12(sp)
+ 80004f4:	0151                	addi	sp,sp,20
+ 80004f6:	8082                	ret
+
+080004f8 <hal.gpio.Pin.write>:
+ 80004f8:	fdc10113          	addi	sp,sp,-36
+ 80004fc:	d006                	sw	ra,32(sp)
+ 80004fe:	ce22                	sw	s0,28(sp)
+ 8000500:	1040                	addi	s0,sp,36
+ 8000502:	86b2                	mv	a3,a2
+ 8000504:	fcb42e23          	sw	a1,-36(s0)
+ 8000508:	0016f613          	andi	a2,a3,1
+ 800050c:	fec42023          	sw	a2,-32(s0)
+ 8000510:	fec404a3          	sb	a2,-23(s0)
+ 8000514:	0005c603          	lbu	a2,0(a1)
+ 8000518:	0015c583          	lbu	a1,1(a1)
+ 800051c:	05a2                	slli	a1,a1,0x8
+ 800051e:	8dd1                	or	a1,a1,a2
+ 8000520:	feb41523          	sh	a1,-22(s0)
+ 8000524:	fea40593          	addi	a1,s0,-22
+ 8000528:	00000097          	auipc	ra,0x0
+ 800052c:	f06080e7          	jalr	-250(ra) # 800042e <hal.gpio.Pin.gpio>
+ 8000530:	fdc42583          	lw	a1,-36(s0)
+ 8000534:	862a                	mv	a2,a0
+ 8000536:	fe042503          	lw	a0,-32(s0)
+ 800053a:	fec42623          	sw	a2,-20(s0)
+ 800053e:	fec42823          	sw	a2,-16(s0)
+ 8000542:	0015c583          	lbu	a1,1(a1)
+ 8000546:	00f5f613          	andi	a2,a1,15
+ 800054a:	4585                	li	a1,1
+ 800054c:	00c595b3          	sll	a1,a1,a2
+ 8000550:	feb42223          	sw	a1,-28(s0)
+ 8000554:	feb42a23          	sw	a1,-12(s0)
+ 8000558:	e519                	bnez	a0,8000566 <hal.gpio.Pin.write+0x6e>
+ 800055a:	a821                	j	8000572 <hal.gpio.Pin.write+0x7a>
+ 800055c:	5082                	lw	ra,32(sp)
+ 800055e:	4472                	lw	s0,28(sp)
+ 8000560:	02410113          	addi	sp,sp,36
+ 8000564:	8082                	ret
+ 8000566:	fe442503          	lw	a0,-28(s0)
+ 800056a:	fec42583          	lw	a1,-20(s0)
+ 800056e:	c988                	sw	a0,16(a1)
+ 8000570:	b7f5                	j	800055c <hal.gpio.Pin.write+0x64>
+ 8000572:	fe442503          	lw	a0,-28(s0)
+ 8000576:	fec42583          	lw	a1,-20(s0)
+ 800057a:	0542                	slli	a0,a0,0x10
+ 800057c:	c988                	sw	a0,16(a1)
+ 800057e:	bff9                	j	800055c <hal.gpio.Pin.write+0x64>
+
+08000580 <periph.registers.systick>:
+ 8000580:	1161                	addi	sp,sp,-8
+ 8000582:	c206                	sw	ra,4(sp)
+ 8000584:	c022                	sw	s0,0(sp)
+ 8000586:	0020                	addi	s0,sp,8
+ 8000588:	e000f537          	lui	a0,0xe000f
+ 800058c:	4092                	lw	ra,4(sp)
+ 800058e:	4402                	lw	s0,0(sp)
+ 8000590:	0121                	addi	sp,sp,8
+ 8000592:	8082                	ret
+
+08000594 <periph.registers.gpioA>:
+ 8000594:	1161                	addi	sp,sp,-8
+ 8000596:	c206                	sw	ra,4(sp)
+ 8000598:	c022                	sw	s0,0(sp)
+ 800059a:	0020                	addi	s0,sp,8
+ 800059c:	40011537          	lui	a0,0x40011
+ 80005a0:	80050513          	addi	a0,a0,-2048 # 40010800 <_ebss+0x200107fc>
+ 80005a4:	4092                	lw	ra,4(sp)
+ 80005a6:	4402                	lw	s0,0(sp)
+ 80005a8:	0121                	addi	sp,sp,8
+ 80005aa:	8082                	ret
+
+080005ac <periph.registers.gpioC>:
+ 80005ac:	1161                	addi	sp,sp,-8
+ 80005ae:	c206                	sw	ra,4(sp)
+ 80005b0:	c022                	sw	s0,0(sp)
+ 80005b2:	0020                	addi	s0,sp,8
+ 80005b4:	40011537          	lui	a0,0x40011
+ 80005b8:	4092                	lw	ra,4(sp)
+ 80005ba:	4402                	lw	s0,0(sp)
+ 80005bc:	0121                	addi	sp,sp,8
+ 80005be:	8082                	ret
+
+080005c0 <periph.registers.gpioD>:
+ 80005c0:	1161                	addi	sp,sp,-8
+ 80005c2:	c206                	sw	ra,4(sp)
+ 80005c4:	c022                	sw	s0,0(sp)
+ 80005c6:	0020                	addi	s0,sp,8
+ 80005c8:	40011537          	lui	a0,0x40011
+ 80005cc:	40050513          	addi	a0,a0,1024 # 40011400 <_ebss+0x200113fc>
+ 80005d0:	4092                	lw	ra,4(sp)
+ 80005d2:	4402                	lw	s0,0(sp)
+ 80005d4:	0121                	addi	sp,sp,8
+ 80005d6:	8082                	ret
+
+080005d8 <__udivsi3>:
+ 80005d8:	1161                	addi	sp,sp,-8
+ 80005da:	c206                	sw	ra,4(sp)
+ 80005dc:	c022                	sw	s0,0(sp)
+ 80005de:	0020                	addi	s0,sp,8
+ 80005e0:	4601                	li	a2,0
+ 80005e2:	c1e5                	beqz	a1,80006c2 <__udivsi3+0xea>
+ 80005e4:	cd79                	beqz	a0,80006c2 <__udivsi3+0xea>
+ 80005e6:	02000613          	li	a2,32
+ 80005ea:	02000693          	li	a3,32
+ 80005ee:	c1b5                	beqz	a1,8000652 <__udivsi3+0x7a>
+ 80005f0:	0015d693          	srli	a3,a1,0x1
+ 80005f4:	55555737          	lui	a4,0x55555
+ 80005f8:	8ecd                	or	a3,a3,a1
+ 80005fa:	55570713          	addi	a4,a4,1365 # 55555555 <_ebss+0x35555551>
+ 80005fe:	0026d793          	srli	a5,a3,0x2
+ 8000602:	8edd                	or	a3,a3,a5
+ 8000604:	0046d793          	srli	a5,a3,0x4
+ 8000608:	8edd                	or	a3,a3,a5
+ 800060a:	0086d793          	srli	a5,a3,0x8
+ 800060e:	8edd                	or	a3,a3,a5
+ 8000610:	0106d793          	srli	a5,a3,0x10
+ 8000614:	8edd                	or	a3,a3,a5
+ 8000616:	fff6c693          	not	a3,a3
+ 800061a:	0016d793          	srli	a5,a3,0x1
+ 800061e:	8f7d                	and	a4,a4,a5
+ 8000620:	333337b7          	lui	a5,0x33333
+ 8000624:	33378793          	addi	a5,a5,819 # 33333333 <_ebss+0x1333332f>
+ 8000628:	8e99                	sub	a3,a3,a4
+ 800062a:	00f6f733          	and	a4,a3,a5
+ 800062e:	8289                	srli	a3,a3,0x2
+ 8000630:	8efd                	and	a3,a3,a5
+ 8000632:	0f0f17b7          	lui	a5,0xf0f1
+ 8000636:	96ba                	add	a3,a3,a4
+ 8000638:	0046d713          	srli	a4,a3,0x4
+ 800063c:	96ba                	add	a3,a3,a4
+ 800063e:	f0f78713          	addi	a4,a5,-241 # f0f0f0f <_sidata+0x70f06a7>
+ 8000642:	8ef9                	and	a3,a3,a4
+ 8000644:	00869713          	slli	a4,a3,0x8
+ 8000648:	96ba                	add	a3,a3,a4
+ 800064a:	01069713          	slli	a4,a3,0x10
+ 800064e:	96ba                	add	a3,a3,a4
+ 8000650:	82e1                	srli	a3,a3,0x18
+ 8000652:	c135                	beqz	a0,80006b6 <__udivsi3+0xde>
+ 8000654:	00155613          	srli	a2,a0,0x1
+ 8000658:	55555737          	lui	a4,0x55555
+ 800065c:	8e49                	or	a2,a2,a0
+ 800065e:	55570713          	addi	a4,a4,1365 # 55555555 <_ebss+0x35555551>
+ 8000662:	00265793          	srli	a5,a2,0x2
+ 8000666:	8e5d                	or	a2,a2,a5
+ 8000668:	00465793          	srli	a5,a2,0x4
+ 800066c:	8e5d                	or	a2,a2,a5
+ 800066e:	00865793          	srli	a5,a2,0x8
+ 8000672:	8e5d                	or	a2,a2,a5
+ 8000674:	01065793          	srli	a5,a2,0x10
+ 8000678:	8e5d                	or	a2,a2,a5
+ 800067a:	fff64613          	not	a2,a2
+ 800067e:	00165793          	srli	a5,a2,0x1
+ 8000682:	8f7d                	and	a4,a4,a5
+ 8000684:	333337b7          	lui	a5,0x33333
+ 8000688:	33378793          	addi	a5,a5,819 # 33333333 <_ebss+0x1333332f>
+ 800068c:	8e19                	sub	a2,a2,a4
+ 800068e:	00f67733          	and	a4,a2,a5
+ 8000692:	8209                	srli	a2,a2,0x2
+ 8000694:	8e7d                	and	a2,a2,a5
+ 8000696:	0f0f17b7          	lui	a5,0xf0f1
+ 800069a:	963a                	add	a2,a2,a4
+ 800069c:	00465713          	srli	a4,a2,0x4
+ 80006a0:	963a                	add	a2,a2,a4
+ 80006a2:	f0f78713          	addi	a4,a5,-241 # f0f0f0f <_sidata+0x70f06a7>
+ 80006a6:	8e79                	and	a2,a2,a4
+ 80006a8:	00861713          	slli	a4,a2,0x8
+ 80006ac:	963a                	add	a2,a2,a4
+ 80006ae:	01061713          	slli	a4,a2,0x10
+ 80006b2:	963a                	add	a2,a2,a4
+ 80006b4:	8261                	srli	a2,a2,0x18
+ 80006b6:	40c687b3          	sub	a5,a3,a2
+ 80006ba:	477d                	li	a4,31
+ 80006bc:	00f77863          	bgeu	a4,a5,80006cc <__udivsi3+0xf4>
+ 80006c0:	4601                	li	a2,0
+ 80006c2:	8532                	mv	a0,a2
+ 80006c4:	4092                	lw	ra,4(sp)
+ 80006c6:	4402                	lw	s0,0(sp)
+ 80006c8:	0121                	addi	sp,sp,8
+ 80006ca:	8082                	ret
+ 80006cc:	00e79663          	bne	a5,a4,80006d8 <__udivsi3+0x100>
+ 80006d0:	4092                	lw	ra,4(sp)
+ 80006d2:	4402                	lw	s0,0(sp)
+ 80006d4:	0121                	addi	sp,sp,8
+ 80006d6:	8082                	ret
+ 80006d8:	4701                	li	a4,0
+ 80006da:	00178293          	addi	t0,a5,1
+ 80006de:	01f7c793          	xori	a5,a5,31
+ 80006e2:	00f517b3          	sll	a5,a0,a5
+ 80006e6:	00555533          	srl	a0,a0,t0
+ 80006ea:	fff6c693          	not	a3,a3
+ 80006ee:	9636                	add	a2,a2,a3
+ 80006f0:	01f7d693          	srli	a3,a5,0x1f
+ 80006f4:	0506                	slli	a0,a0,0x1
+ 80006f6:	0786                	slli	a5,a5,0x1
+ 80006f8:	8d55                	or	a0,a0,a3
+ 80006fa:	8fd9                	or	a5,a5,a4
+ 80006fc:	fff54693          	not	a3,a0
+ 8000700:	96ae                	add	a3,a3,a1
+ 8000702:	01f6d713          	srli	a4,a3,0x1f
+ 8000706:	86fd                	srai	a3,a3,0x1f
+ 8000708:	8eed                	and	a3,a3,a1
+ 800070a:	0605                	addi	a2,a2,1
+ 800070c:	8d15                	sub	a0,a0,a3
+ 800070e:	f26d                	bnez	a2,80006f0 <__udivsi3+0x118>
+ 8000710:	00179613          	slli	a2,a5,0x1
+ 8000714:	00e66533          	or	a0,a2,a4
+ 8000718:	4092                	lw	ra,4(sp)
+ 800071a:	4402                	lw	s0,0(sp)
+ 800071c:	0121                	addi	sp,sp,8
+ 800071e:	8082                	ret
+
+08000720 <__mulsi3>:
+ 8000720:	1161                	addi	sp,sp,-8
+ 8000722:	c206                	sw	ra,4(sp)
+ 8000724:	c022                	sw	s0,0(sp)
+ 8000726:	0020                	addi	s0,sp,8
+ 8000728:	4601                	li	a2,0
+ 800072a:	c909                	beqz	a0,800073c <__mulsi3+0x1c>
+ 800072c:	01f51693          	slli	a3,a0,0x1f
+ 8000730:	8105                	srli	a0,a0,0x1
+ 8000732:	86fd                	srai	a3,a3,0x1f
+ 8000734:	8eed                	and	a3,a3,a1
+ 8000736:	9636                	add	a2,a2,a3
+ 8000738:	0586                	slli	a1,a1,0x1
+ 800073a:	f96d                	bnez	a0,800072c <__mulsi3+0xc>
+ 800073c:	8532                	mv	a0,a2
+ 800073e:	4092                	lw	ra,4(sp)
+ 8000740:	4402                	lw	s0,0(sp)
+ 8000742:	0121                	addi	sp,sp,8
+ 8000744:	8082                	ret
+
+08000746 <__muldi3>:
+ 8000746:	7179                	addi	sp,sp,-48
+ 8000748:	d606                	sw	ra,44(sp)
+ 800074a:	d422                	sw	s0,40(sp)
+ 800074c:	d226                	sw	s1,36(sp)
+ 800074e:	1800                	addi	s0,sp,48
+ 8000750:	fed42423          	sw	a3,-24(s0)
+ 8000754:	fec42623          	sw	a2,-20(s0)
+ 8000758:	feb42223          	sw	a1,-28(s0)
+ 800075c:	fea42823          	sw	a0,-16(s0)
+ 8000760:	64c1                	lui	s1,0x10
+ 8000762:	14fd                	addi	s1,s1,-1 # ffff <.Lline_table_start0+0xffff>
+ 8000764:	009575b3          	and	a1,a0,s1
+ 8000768:	fcb42c23          	sw	a1,-40(s0)
+ 800076c:	00967533          	and	a0,a2,s1
+ 8000770:	fca42823          	sw	a0,-48(s0)
+ 8000774:	00000097          	auipc	ra,0x0
+ 8000778:	fac080e7          	jalr	-84(ra) # 8000720 <__mulsi3>
+ 800077c:	01055593          	srli	a1,a0,0x10
+ 8000780:	feb42023          	sw	a1,-32(s0)
+ 8000784:	8d65                	and	a0,a0,s1
+ 8000786:	fca42e23          	sw	a0,-36(s0)
+ 800078a:	ff042503          	lw	a0,-16(s0)
+ 800078e:	01055593          	srli	a1,a0,0x10
+ 8000792:	fcb42a23          	sw	a1,-44(s0)
+ 8000796:	fd042503          	lw	a0,-48(s0)
+ 800079a:	00000097          	auipc	ra,0x0
+ 800079e:	f86080e7          	jalr	-122(ra) # 8000720 <__mulsi3>
+ 80007a2:	fe042583          	lw	a1,-32(s0)
+ 80007a6:	952e                	add	a0,a0,a1
+ 80007a8:	01055593          	srli	a1,a0,0x10
+ 80007ac:	feb42023          	sw	a1,-32(s0)
+ 80007b0:	8d65                	and	a0,a0,s1
+ 80007b2:	fca42823          	sw	a0,-48(s0)
+ 80007b6:	fec42483          	lw	s1,-20(s0)
+ 80007ba:	80c1                	srli	s1,s1,0x10
+ 80007bc:	8526                	mv	a0,s1
+ 80007be:	fd842583          	lw	a1,-40(s0)
+ 80007c2:	00000097          	auipc	ra,0x0
+ 80007c6:	f5e080e7          	jalr	-162(ra) # 8000720 <__mulsi3>
+ 80007ca:	fd042583          	lw	a1,-48(s0)
+ 80007ce:	952e                	add	a0,a0,a1
+ 80007d0:	01051593          	slli	a1,a0,0x10
+ 80007d4:	fdc42603          	lw	a2,-36(s0)
+ 80007d8:	8dd1                	or	a1,a1,a2
+ 80007da:	fcb42e23          	sw	a1,-36(s0)
+ 80007de:	8141                	srli	a0,a0,0x10
+ 80007e0:	fca42c23          	sw	a0,-40(s0)
+ 80007e4:	8526                	mv	a0,s1
+ 80007e6:	fd442583          	lw	a1,-44(s0)
+ 80007ea:	00000097          	auipc	ra,0x0
+ 80007ee:	f36080e7          	jalr	-202(ra) # 8000720 <__mulsi3>
+ 80007f2:	fca42a23          	sw	a0,-44(s0)
+ 80007f6:	fe442503          	lw	a0,-28(s0)
+ 80007fa:	fec42583          	lw	a1,-20(s0)
+ 80007fe:	00000097          	auipc	ra,0x0
+ 8000802:	f22080e7          	jalr	-222(ra) # 8000720 <__mulsi3>
+ 8000806:	84aa                	mv	s1,a0
+ 8000808:	fe842503          	lw	a0,-24(s0)
+ 800080c:	ff042583          	lw	a1,-16(s0)
+ 8000810:	00000097          	auipc	ra,0x0
+ 8000814:	f10080e7          	jalr	-240(ra) # 8000720 <__mulsi3>
+ 8000818:	9526                	add	a0,a0,s1
+ 800081a:	fd442583          	lw	a1,-44(s0)
+ 800081e:	952e                	add	a0,a0,a1
+ 8000820:	fe042583          	lw	a1,-32(s0)
+ 8000824:	952e                	add	a0,a0,a1
+ 8000826:	fd842583          	lw	a1,-40(s0)
+ 800082a:	95aa                	add	a1,a1,a0
+ 800082c:	fdc42503          	lw	a0,-36(s0)
+ 8000830:	50b2                	lw	ra,44(sp)
+ 8000832:	5422                	lw	s0,40(sp)
+ 8000834:	5492                	lw	s1,36(sp)
+ 8000836:	6145                	addi	sp,sp,48
+ 8000838:	8082                	ret
+
+0800083a <__anon_2776>:
+ 800083a:	6e69 6574 6567 2072 766f 7265 6c66 776f     integer overflow
+	...
+
+0800084b <__anon_5636>:
+ 800084b:	7773 7469 6863 6f20 206e 6f63 7272 7075     switch on corrup
+ 800085b:	2074 6176 756c 0065 0000 dc6c                t value...l..
