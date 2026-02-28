@@ -117,8 +117,8 @@ pub fn drawPixel(x: i16, y: i16, color: bool) void {
 }
 
 pub fn drawImage(x: i16, y: i16, input: []const u8, w: u8, h: u8, mode: DrawMode) void {
-    if (w < 8 or h == 0 or (w & 7) != 0) return;
-    const bytes_per_row: usize = @intCast(w / 8);
+    if (w == 0 or h == 0) return;
+    const bytes_per_row = (@as(usize, w) + 7) / 8;
 
     var line: usize = 0;
     while (line < h) : (line += 1) {
@@ -135,7 +135,10 @@ pub fn drawImage(x: i16, y: i16, input: []const u8, w: u8, h: u8, mode: DrawMode
 
             var pixel: usize = 0;
             while (pixel < 8) : (pixel += 1) {
-                const x_abs = x + @as(i16, @intCast(8 * byte + pixel));
+                const image_x = 8 * byte + pixel;
+                if (image_x >= w) break;
+
+                const x_abs = x + @as(i16, @intCast(image_x));
                 if (x_abs < 0) continue;
                 if (x_abs >= width) break;
 
