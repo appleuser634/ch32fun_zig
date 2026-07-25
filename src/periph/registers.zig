@@ -67,8 +67,8 @@ pub const FLASH_KEY1: u32 = 0x45670123;
 pub const FLASH_KEY2: u32 = 0xCDEF89AB;
 
 // Flash CTLR bits
-pub const FLASH_CTLR_PG: u32 = 1 << 0; // synonym FTPG (fast program)
-pub const FLASH_CTLR_PER: u32 = 1 << 1; // synonym FTER (fast erase)
+pub const FLASH_CTLR_PG: u32 = 1 << 16; // PAGE_PG: 64-byte fast page program
+pub const FLASH_CTLR_PER: u32 = 1 << 17; // PAGE_ER: 64-byte fast page erase
 pub const FLASH_CTLR_STRT: u32 = 1 << 6;
 pub const FLASH_CTLR_LOCK: u32 = 1 << 7;
 pub const FLASH_CTLR_FAST_LOCK: u32 = 1 << 15;
