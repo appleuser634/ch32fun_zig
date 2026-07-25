@@ -202,6 +202,12 @@ PD1 active-low のショートカットとして残しています。
 
 `fun.ir` は `IRText v1` フレームを使います。38kHz キャリア、NEC風の pulse-distance bit、`"IR"` magic、version、payload length、UTF-8 payload、Dallas/Maxim CRC-8 で構成されます。
 
+CH32V003J4M6 で低ジッタのキャリアを使う場合は、ドライバを `PC4` に接続し、
+`Tx.carrier_mode = .tim1_ch4_pc4` を指定します。`sendPacket32` /
+`recvPacket32` では固定長のコンパクトな NEC 風フレームを送受信できます。
+`sendFrame8` / `recvFrame8` では、アプリ側の64 bit演算なしで8バイトの
+固定長フレームを送受信できます。
+
 ## よく使うコマンド
 
 ```sh

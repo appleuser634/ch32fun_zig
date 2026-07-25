@@ -206,6 +206,12 @@ PD1 active-low shortcuts for existing examples.
 
 `fun.ir` uses the `IRText v1` frame format: a 38kHz carrier, NEC-like pulse-distance bits, `"IR"` magic, version byte, payload length, UTF-8 payload bytes, and Dallas/Maxim CRC-8.
 
+For a low-jitter carrier on CH32V003J4M6, set
+`Tx.carrier_mode = .tim1_ch4_pc4` and connect the driver to `PC4`.
+`sendPacket32` / `recvPacket32` provide a compact fixed-size NEC-like frame.
+`sendFrame8` / `recvFrame8` provide an eight-byte form without application-side
+64-bit arithmetic.
+
 ## Common Commands
 
 ```sh

@@ -58,13 +58,27 @@ fn Timer(comptime is_advanced: bool, comptime regs_fn: anytype, comptime rcc_apb
 
         pub fn enableChannel(ch: Channel) void {
             const t = regs_fn();
+            t.CCER |= channelEnableBit(ch);
+        }
+
+        pub fn disableChannel(ch: Channel) void {
+            const t = regs_fn();
+            t.CCER &= ~channelEnableBit(ch);
+        }
+
+        pub fn setActiveHigh(ch: Channel, active_high: bool) void {
+            const t = regs_fn();
             const bit: u16 = switch (ch) {
-                .ch1 => regs.TIM_CCER_CC1E,
-                .ch2 => regs.TIM_CCER_CC2E,
-                .ch3 => regs.TIM_CCER_CC3E,
-                .ch4 => regs.TIM_CCER_CC4E,
+                .ch1 => regs.TIM_CCER_CC1P,
+                .ch2 => regs.TIM_CCER_CC2P,
+                .ch3 => regs.TIM_CCER_CC3P,
+                .ch4 => regs.TIM_CCER_CC4P,
             };
-            t.CCER |= bit;
+            if (active_high) {
+                t.CCER &= ~bit;
+            } else {
+                t.CCER |= bit;
+            }
         }
 
         pub fn setDuty(ch: Channel, value: u16) void {
@@ -83,6 +97,15 @@ fn Timer(comptime is_advanced: bool, comptime regs_fn: anytype, comptime rcc_apb
 
         pub fn stop() void {
             regs_fn().CTLR1 &= ~regs.TIM_CTLR1_CEN;
+        }
+
+        fn channelEnableBit(ch: Channel) u16 {
+            return switch (ch) {
+                .ch1 => regs.TIM_CCER_CC1E,
+                .ch2 => regs.TIM_CCER_CC2E,
+                .ch3 => regs.TIM_CCER_CC3E,
+                .ch4 => regs.TIM_CCER_CC4E,
+            };
         }
     };
 }
