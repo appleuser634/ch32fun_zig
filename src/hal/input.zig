@@ -1,4 +1,5 @@
 const gpio = @import("gpio.zig");
+const time = @import("time.zig");
 
 pub const Pull = enum {
     floating,
@@ -52,6 +53,37 @@ pub const Button = struct {
 
     pub fn isReleased(self: Button) bool {
         return !self.isPressed();
+    }
+};
+
+/// Non-blocking switch debouncer. A raw state must remain unchanged for
+/// `debounce_us` before it becomes the stable state returned by `update`.
+pub const Debouncer = struct {
+    stable: bool = false,
+    candidate: bool = false,
+    candidate_since: u32 = 0,
+    initialized: bool = false,
+    debounce_us: u32 = 20_000,
+
+    pub fn update(self: *Debouncer, raw: bool) bool {
+        const now = time.nowCycles();
+        if (!self.initialized) {
+            self.stable = raw;
+            self.candidate = raw;
+            self.candidate_since = now;
+            self.initialized = true;
+            return self.stable;
+        }
+
+        if (raw != self.candidate) {
+            self.candidate = raw;
+            self.candidate_since = now;
+        } else if (self.candidate != self.stable and
+            time.elapsedUsSince(self.candidate_since) >= self.debounce_us)
+        {
+            self.stable = self.candidate;
+        }
+        return self.stable;
     }
 };
 
