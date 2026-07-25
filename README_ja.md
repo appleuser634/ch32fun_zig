@@ -155,7 +155,7 @@ zig build -Dexample=blinky flash
 
 注:
 - I2C は `1MHz` Fast mode 設定です。
-- SSD1306 I2C アドレスは `0x3C` 前提です。
+- SSD1306 I2C アドレスは `0x3C`、`0x3D` の順に自動検出します。
 
 ## SSD1306 描画ヘルパ
 
@@ -163,6 +163,7 @@ zig build -Dexample=blinky flash
 - `logicalWidth()` / `logicalHeight()` で現在の論理座標サイズを取得できます（縦画面では `64x128`）。
 - `drawStrRot` / `drawCharRot` / `drawImageRot` で `0/90/180/270` 回転表示ができます。
 - `measureText` / `measureTextRot` で内蔵 8x8 フォントの文字列サイズを取得でき、中央寄せや右寄せに使えます。
+- 既定値は従来どおり256文字のフルフォントです。容量を優先する場合はルートソースに `pub const ch32fun_ssd1306_basic_ascii_font = true;` を宣言すると、728バイトのASCII `0x20`〜`0x7A`だけを組み込みます。範囲外の文字は空白表示になります。
 - 文字は `opaque_bg=false` で背景透過描画できます。
 - 基本図形として `drawLine` / `drawRect` / `fillRect` / `drawCircle` / `fillCircle` / `drawRoundRect` / `fillRoundRect` / `drawHLine` / `drawVLine` を追加しています。
 - 拡張ヘルパとして `drawLineThick` / `drawRectThick` / `drawCircleThick` / `drawRoundRectThick` / `drawFrame` / `drawRoundFrame` / `drawTriangle` / `fillTriangle` / `drawEllipse` / `fillEllipse` / `drawProgressBar` を追加しています。

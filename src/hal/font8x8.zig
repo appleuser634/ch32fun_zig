@@ -2048,3 +2048,20 @@ pub const fontdata = [_]u8{
     0x00,
     0x00,
 };
+
+/// Compact printable ASCII subset used by size-constrained applications.
+///
+/// This remains opt-in: the SSD1306 HAL uses `fontdata` unless the root module
+/// declares `pub const ch32fun_ssd1306_basic_ascii_font = true`.
+pub const basic_ascii_first: u8 = 0x20;
+pub const basic_ascii_last: u8 = 0x7a;
+pub const basic_ascii = fontdata[@as(usize, basic_ascii_first) * 8 .. (@as(usize, basic_ascii_last) + 1) * 8].*;
+
+test "basic ASCII font is the corresponding full-font subset" {
+    const std = @import("std");
+    try std.testing.expectEqualSlices(
+        u8,
+        fontdata[@as(usize, basic_ascii_first) * 8 .. (@as(usize, basic_ascii_last) + 1) * 8],
+        &basic_ascii,
+    );
+}

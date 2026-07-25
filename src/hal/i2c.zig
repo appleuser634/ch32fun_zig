@@ -5,6 +5,7 @@ const system = @import("../system/system.zig");
 pub const Error = error{
     BusyTimeout,
     MasterModeTimeout,
+    AddressNack,
     TxModeTimeout,
     TxEmptyTimeout,
     TxDoneTimeout,
@@ -73,8 +74,20 @@ pub fn writeBlocking7bit(addr: u7, bytes: []const u8) Error!void {
     i2c.DATAR = @as(u16, addr) << 1;
 
     timeout = timeout_max;
-    while (!checkEvent(evt_master_tx_selected) and timeout > 0) : (timeout -= 1) {}
-    if (timeout <= 0) return Error.TxModeTimeout;
+    while (!checkEvent(evt_master_tx_selected) and
+        (i2c.STAR1 & regs.I2C_STAR1_AF) == 0 and
+        timeout > 0) : (timeout -= 1)
+    {}
+    if ((i2c.STAR1 & regs.I2C_STAR1_AF) != 0) {
+        i2c.STAR1 &= ~regs.I2C_STAR1_AF;
+        i2c.CTLR1 |= regs.I2C_CTLR1_STOP;
+        return Error.AddressNack;
+    }
+    if (timeout <= 0) {
+        i2c.CTLR1 |= regs.I2C_CTLR1_STOP;
+        resetAndSetup();
+        return Error.TxModeTimeout;
+    }
 
     for (bytes) |b| {
         timeout = timeout_max;

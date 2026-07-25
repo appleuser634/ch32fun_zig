@@ -1,14 +1,25 @@
 const i2c = @import("i2c.zig");
 const font = @import("font8x8.zig");
+const root = @import("root");
+
+/// Opt-in compact font selection. Existing applications retain the full
+/// 256-glyph font unless they explicitly declare this root-level option.
+const use_basic_ascii_font = if (@hasDecl(root, "ch32fun_ssd1306_basic_ascii_font"))
+    root.ch32fun_ssd1306_basic_ascii_font
+else
+    false;
 
 pub const width: u8 = 128;
 pub const height: u8 = 64;
 const width_us: usize = width;
 const height_us: usize = height;
 const packet_size: usize = 32;
-const i2c_addr: u7 = 0x3c;
+pub const Address = enum(u7) {
+    primary = 0x3c,
+    alternate = 0x3d,
+};
 
-pub const Error = i2c.Error;
+pub const Error = i2c.Error || error{DisplayNotFound};
 
 pub const DrawMode = enum {
     normal,
@@ -47,6 +58,7 @@ pub const TextExtent = struct {
 
 pub var buffer: [width_us * height_us / 8]u8 = [_]u8{0} ** (width_us * height_us / 8);
 var current_orientation: Orientation = .landscape;
+var current_address: Address = .primary;
 
 const init_commands = [_]u8{
     0xAE,
@@ -78,14 +90,14 @@ const init_commands = [_]u8{
 
 fn cmd(command: u8) Error!void {
     var pkt = [_]u8{ 0x00, command };
-    try i2c.writeBlocking7bit(i2c_addr, pkt[0..]);
+    try i2c.writeBlocking7bit(@intFromEnum(current_address), pkt[0..]);
 }
 
 fn data(chunk: []const u8) Error!void {
     var pkt: [packet_size + 1]u8 = undefined;
     pkt[0] = 0x40;
     @memcpy(pkt[1 .. 1 + chunk.len], chunk);
-    try i2c.writeBlocking7bit(i2c_addr, pkt[0 .. 1 + chunk.len]);
+    try i2c.writeBlocking7bit(@intFromEnum(current_address), pkt[0 .. 1 + chunk.len]);
 }
 
 fn mapPoint(x: i16, y: i16) ?struct { x: i16, y: i16 } {
@@ -152,8 +164,15 @@ fn imagePixel(input: []const u8, w: u8, x: u8, y: u8) bool {
 }
 
 fn glyphPixel(chr: u8, x: u8, y: u8) bool {
-    const glyph_base = (@as(usize, chr) << 3);
-    return (font.fontdata[glyph_base + y] & (@as(u8, 0x80) >> @as(u3, @intCast(x)))) != 0;
+    const glyph_row = if (comptime use_basic_ascii_font) blk: {
+        if (chr < font.basic_ascii_first or chr > font.basic_ascii_last) break :blk 0;
+        const glyph_base = (@as(usize, chr - font.basic_ascii_first) << 3);
+        break :blk font.basic_ascii[glyph_base + y];
+    } else blk: {
+        const glyph_base = (@as(usize, chr) << 3);
+        break :blk font.fontdata[glyph_base + y];
+    };
+    return (glyph_row & (@as(u8, 0x80) >> @as(u3, @intCast(x)))) != 0;
 }
 
 fn clampRadius(w: i16, h: i16, radius: i16) i16 {
@@ -195,12 +214,32 @@ pub fn initPanel() !void {
 }
 
 pub fn initPanelWithOrientation(panel_orientation: Orientation) !void {
+    for ([_]Address{ .primary, .alternate }) |address| {
+        initPanelAtAddressWithOrientation(address, panel_orientation) catch |err| switch (err) {
+            error.AddressNack => continue,
+            else => return err,
+        };
+        return;
+    }
+    return error.DisplayNotFound;
+}
+
+pub fn initPanelAtAddress(address: Address) !void {
+    try initPanelAtAddressWithOrientation(address, .landscape);
+}
+
+pub fn initPanelAtAddressWithOrientation(address: Address, panel_orientation: Orientation) !void {
+    current_address = address;
     setOrientation(panel_orientation);
     for (init_commands) |c| {
         try cmd(c);
     }
     setbuf(false);
     try refresh();
+}
+
+pub fn currentAddress() Address {
+    return current_address;
 }
 
 pub fn setOrientation(panel_orientation: Orientation) void {

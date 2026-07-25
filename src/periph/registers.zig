@@ -53,6 +53,7 @@ pub const I2C_CTLR1_ACK: u16 = 0x0400;
 pub const I2C_CTLR2_FREQ: u16 = 0x003F;
 
 pub const I2C_STAR1_TXE: u16 = 0x0080;
+pub const I2C_STAR1_AF: u16 = 0x0400;
 pub const I2C_STAR2_BUSY: u16 = 0x0002;
 
 pub const I2C_CKCFGR_CCR: u16 = 0x0FFF;

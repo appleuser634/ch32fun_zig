@@ -159,7 +159,7 @@ zig build -Dexample=blinky flash
 
 Notes:
 - I2C is configured as `1MHz` Fast mode.
-- SSD1306 I2C address is assumed to be `0x3C`.
+- SSD1306 I2C address is detected automatically (`0x3C`, then `0x3D`).
 
 ## SSD1306 Drawing Helpers
 
@@ -167,6 +167,7 @@ Notes:
 - `logicalWidth()` / `logicalHeight()` return the active logical coordinate size (`64x128` in portrait orientations).
 - `drawStrRot`, `drawCharRot`, and `drawImageRot` support `0/90/180/270` rotation.
 - `measureText` and `measureTextRot` help with centered/right-aligned layout using the built-in 8x8 font.
+- The full 256-glyph font remains the default. Size-constrained firmware can opt into the 728-byte ASCII `0x20`-`0x7A` subset by declaring `pub const ch32fun_ssd1306_basic_ascii_font = true;` in its root source file; characters outside that range render blank.
 - Text can be drawn with transparent background by passing `opaque_bg=false`.
 - Basic primitives are available: `drawLine`, `drawRect`, `fillRect`, `drawCircle`, `fillCircle`, `drawRoundRect`, `fillRoundRect`, `drawHLine`, `drawVLine`.
 - Enhanced helpers include `drawLineThick`, `drawRectThick`, `drawCircleThick`, `drawRoundRectThick`, `drawFrame`, `drawRoundFrame`, `drawTriangle`, `fillTriangle`, `drawEllipse`, `fillEllipse`, and `drawProgressBar`.
