@@ -253,6 +253,9 @@ chzig minichlink -r dump.bin flash 16384
 入れる場合は `sh tools/install-chzig.sh --prefix /path/to/prefix` を使います。
 インストーラは `../ch32fun/minichlink/minichlink` も install prefix 内へ同梱するため、
 `chzig flash` で `zig-out/firmware/firmware.bin` をビルドして書き込めます。
+ビルド後、`chzig flash` は minichlink の起動前に FLASH と RAM の占有率を
+パーセント付きのバーで表示します。FLASH はユーザーデータ用の最終64バイトを
+除いた16,320バイトをアプリ領域として計算します。
 高度な書き込み器操作は `chzig minichlink ...` で指定でき、引数は内包
 `minichlink` へそのまま渡されます。
 

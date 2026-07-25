@@ -109,6 +109,94 @@ sanitize_name() {
   printf '%s\n' "$name"
 }
 
+memory_bar() {
+  mu_label=$1
+  mu_used=$2
+  mu_total=$3
+  mu_width=24
+  mu_filled=$((mu_used * mu_width / mu_total))
+  [ "$mu_filled" -le "$mu_width" ] || mu_filled=$mu_width
+  mu_empty=$((mu_width - mu_filled))
+  mu_bar=""
+  while [ "$mu_filled" -gt 0 ]; do
+    mu_bar="${mu_bar}#"
+    mu_filled=$((mu_filled - 1))
+  done
+  while [ "$mu_empty" -gt 0 ]; do
+    mu_bar="${mu_bar}-"
+    mu_empty=$((mu_empty - 1))
+  done
+  mu_tenths=$((mu_used * 1000 / mu_total))
+  printf '  %-5s [%s] %6d / %6d bytes (%3d.%d%%)\n' \
+    "$mu_label" "$mu_bar" "$mu_used" "$mu_total" \
+    $((mu_tenths / 10)) $((mu_tenths % 10))
+}
+
+elf_ram_usage() {
+  mu_elf=$1
+  [ -f "$mu_elf" ] || return 1
+
+  # Stripped ELF files still retain program headers. Sum the memory sizes of
+  # LOAD segments mapped into the CH32V003 SRAM range (.data and .bss).
+  set -- $(od -An -tu1 -N6 "$mu_elf" 2>/dev/null)
+  [ "${1:-}" = 127 ] && [ "${2:-}" = 69 ] &&
+    [ "${3:-}" = 76 ] && [ "${4:-}" = 70 ] &&
+    [ "${5:-}" = 1 ] && [ "${6:-}" = 1 ] || return 1
+
+  mu_phoff=$(od -An -tu4 -j28 -N4 "$mu_elf" 2>/dev/null | tr -d ' ')
+  set -- $(od -An -tu2 -j42 -N4 "$mu_elf" 2>/dev/null)
+  mu_phentsize=${1:-0}
+  mu_phnum=${2:-0}
+  [ "$mu_phentsize" -eq 32 ] && [ "$mu_phnum" -gt 0 ] || return 1
+
+  od -An -v -tu4 -j"$mu_phoff" -N$((mu_phentsize * mu_phnum)) "$mu_elf" 2>/dev/null |
+    awk '
+      {
+        for (i = 1; i <= NF; i++) word[count++] = $i
+      }
+      END {
+        ram = 0
+        for (base = 0; base + 7 < count; base += 8) {
+          type = word[base]
+          vaddr = word[base + 2]
+          memsz = word[base + 5]
+          if (type == 1 && vaddr >= 536870912 && vaddr < 536872960) {
+            ram += memsz
+          }
+        }
+        print ram
+      }
+    '
+}
+
+print_memory_usage() {
+  mu_bin=$1
+  mu_flash=$(wc -c < "$mu_bin" | tr -d ' ')
+  mu_base=$(basename "$mu_bin")
+  mu_base=${mu_base%.bin}
+  mu_ram=""
+
+  for mu_elf in \
+    "zig-out/bin/$mu_base" \
+    "${mu_bin%.bin}.elf" \
+    "zig-out/firmware/$mu_base.elf"
+  do
+    if mu_ram=$(elf_ram_usage "$mu_elf"); then
+      break
+    fi
+    mu_ram=""
+  done
+
+  printf '\nMemory usage (CH32V003):\n'
+  memory_bar "FLASH" "$mu_flash" 16320
+  if [ -n "$mu_ram" ]; then
+    memory_bar "RAM" "$mu_ram" 2048
+  else
+    printf '  %-5s [????????????????????????] unavailable (ELF not found)\n' "RAM"
+  fi
+  printf '  FLASH capacity excludes the reserved 64-byte user-data page.\n\n'
+}
+
 relative_path() {
   from=$1
   to=$2
@@ -356,6 +444,7 @@ cmd_flash() {
   fi
 
   [ -f "$bin" ] || die "missing binary: $bin"
+  print_memory_usage "$bin"
   exec "$minichlink" -w "$bin" flash -b
 }
 

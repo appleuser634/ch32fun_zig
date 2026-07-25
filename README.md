@@ -262,6 +262,9 @@ By default the installer writes `chzig` to `$HOME/.local/bin`. Use
 The installer also bundles `../ch32fun/minichlink/minichlink` into the install
 prefix, so `chzig flash` can build and write `zig-out/firmware/firmware.bin`
 without depending on the original checkout layout.
+After building, `chzig flash` prints FLASH and RAM usage as percentage bars
+before invoking minichlink. FLASH is measured against the 16,320-byte
+application region; the final 64-byte page remains reserved for user data.
 For advanced programmer operations, `chzig minichlink ...` passes every argument
 through to the bundled `minichlink` binary unchanged.
 
