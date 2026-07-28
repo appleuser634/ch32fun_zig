@@ -12,8 +12,9 @@ pub const Error = error{
 };
 
 const timeout_max: i32 = 100_000;
-const bus_clock_hz: u32 = 1_000_000;
+const default_bus_clock_hz: u32 = 1_000_000;
 const logic_clock_hz: u32 = 2_000_000;
+var bus_clock_hz: u32 = default_bus_clock_hz;
 
 const evt_master_mode_select: u32 = 0x00030001;
 const evt_master_tx_selected: u32 = 0x00070082;
@@ -37,8 +38,8 @@ fn resetAndSetup() void {
     tmp |= @as(u16, @intCast((system.core_clock_hz / logic_clock_hz) & regs.I2C_CTLR2_FREQ));
     i2c.CTLR2 = tmp;
 
-    var ckcfgr: u16 = @as(u16, @intCast((system.core_clock_hz / (25 * bus_clock_hz)) & regs.I2C_CKCFGR_CCR));
-    ckcfgr |= regs.I2C_CKCFGR_DUTY;
+    // Fast mode, duty cycle 2: SCL = PCLK / (3 * CCR).
+    var ckcfgr: u16 = @as(u16, @intCast((system.core_clock_hz / (3 * bus_clock_hz)) & regs.I2C_CKCFGR_CCR));
     ckcfgr |= regs.I2C_CKCFGR_FS;
     i2c.CKCFGR = ckcfgr;
 
@@ -55,6 +56,13 @@ pub fn initI2c1FastMode() void {
     gpio.pin(.C, 1).configure(.output_af_od_10mhz); // SDA
     gpio.pin(.C, 2).configure(.output_af_od_10mhz); // SCL
 
+    resetAndSetup();
+}
+
+/// Reconfigure I2C1 Fast-mode SCL. The peripheral must already be initialized.
+pub fn setBusClockHz(clock_hz: u32) void {
+    if (clock_hz == 0) return;
+    bus_clock_hz = clock_hz;
     resetAndSetup();
 }
 

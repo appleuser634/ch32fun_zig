@@ -19,6 +19,12 @@ pub const Address = enum(u7) {
     alternate = 0x3d,
 };
 
+pub const Controller = enum {
+    ssd1306,
+    ssd1309,
+    sh1106,
+};
+
 pub const Error = i2c.Error || error{DisplayNotFound};
 
 pub const DrawMode = enum {
@@ -59,8 +65,9 @@ pub const TextExtent = struct {
 pub var buffer: [width_us * height_us / 8]u8 = [_]u8{0} ** (width_us * height_us / 8);
 var current_orientation: Orientation = .landscape;
 var current_address: Address = .primary;
+var current_controller: Controller = .ssd1306;
 
-const init_commands = [_]u8{
+const init_commands_ssd1306 = [_]u8{
     0xAE,
     0xD5,
     0x80,
@@ -87,6 +94,69 @@ const init_commands = [_]u8{
     0xA6,
     0xAF,
 };
+
+// SSD1309 implements the same 128x64 GDDRAM and addressing commands, but it
+// has no SSD1306-style internal charge pump. In particular, 8Dh/14h is not
+// part of the SSD1309 command set and must not be sent.
+const init_commands_ssd1309 = [_]u8{
+    0xAE,
+    0xD5,
+    0x80,
+    0xA8,
+    0x3F,
+    0xD3,
+    0x00,
+    0x40,
+    0x20,
+    0x00,
+    0xA1,
+    0xC8,
+    0xDA,
+    0x12,
+    0x81,
+    0xCF,
+    0xD9,
+    0xF1,
+    0xDB,
+    0x40,
+    0xA4,
+    0xA6,
+    0xAF,
+};
+
+const init_commands_sh1106 = [_]u8{
+    0xAE,
+    0xD5,
+    0x80,
+    0xA8,
+    0x3F,
+    0xD3,
+    0x00,
+    0x40,
+    0xAD,
+    0x8B,
+    0xA1,
+    0xC8,
+    0xDA,
+    0x12,
+    0x81,
+    0xCF,
+    0xD9,
+    0xF1,
+    0xDB,
+    0x40,
+    0xA4,
+    0xA6,
+    0xAF,
+};
+
+fn initCommands(controller_type: Controller) []const u8 {
+    return switch (controller_type) {
+        .ssd1306 => &init_commands_ssd1306,
+        .ssd1309 => &init_commands_ssd1309,
+        .sh1106 => &init_commands_sh1106,
+    };
+}
 
 fn cmd(command: u8) Error!void {
     var pkt = [_]u8{ 0x00, command };
@@ -210,12 +280,21 @@ pub fn initI2c() !void {
 }
 
 pub fn initPanel() !void {
-    try initPanelWithOrientation(.landscape);
+    try initPanelController(.ssd1306);
 }
 
 pub fn initPanelWithOrientation(panel_orientation: Orientation) !void {
+    try initPanelControllerWithOrientation(.ssd1306, panel_orientation);
+}
+
+pub fn initPanelController(controller_type: Controller) !void {
+    try initPanelControllerWithOrientation(controller_type, .landscape);
+}
+
+pub fn initPanelControllerWithOrientation(controller_type: Controller, panel_orientation: Orientation) !void {
+    if (controller_type == .sh1106) i2c.setBusClockHz(400_000);
     for ([_]Address{ .primary, .alternate }) |address| {
-        initPanelAtAddressWithOrientation(address, panel_orientation) catch |err| switch (err) {
+        initPanelAtAddressControllerWithOrientation(address, controller_type, panel_orientation) catch |err| switch (err) {
             error.AddressNack => continue,
             else => return err,
         };
@@ -225,13 +304,22 @@ pub fn initPanelWithOrientation(panel_orientation: Orientation) !void {
 }
 
 pub fn initPanelAtAddress(address: Address) !void {
-    try initPanelAtAddressWithOrientation(address, .landscape);
+    try initPanelAtAddressController(address, .ssd1306);
 }
 
 pub fn initPanelAtAddressWithOrientation(address: Address, panel_orientation: Orientation) !void {
+    try initPanelAtAddressControllerWithOrientation(address, .ssd1306, panel_orientation);
+}
+
+pub fn initPanelAtAddressController(address: Address, controller_type: Controller) !void {
+    try initPanelAtAddressControllerWithOrientation(address, controller_type, .landscape);
+}
+
+pub fn initPanelAtAddressControllerWithOrientation(address: Address, controller_type: Controller, panel_orientation: Orientation) !void {
     current_address = address;
+    current_controller = controller_type;
     setOrientation(panel_orientation);
-    for (init_commands) |c| {
+    for (initCommands(controller_type)) |c| {
         try cmd(c);
     }
     setbuf(false);
@@ -240,6 +328,10 @@ pub fn initPanelAtAddressWithOrientation(address: Address, panel_orientation: Or
 
 pub fn currentAddress() Address {
     return current_address;
+}
+
+pub fn controller() Controller {
+    return current_controller;
 }
 
 pub fn setOrientation(panel_orientation: Orientation) void {
@@ -269,6 +361,8 @@ pub fn setbuf(color: bool) void {
 }
 
 pub fn refresh() !void {
+    if (current_controller == .sh1106) return refreshSh1106();
+
     try cmd(0x21);
     try cmd(0);
     try cmd(width - 1);
@@ -281,6 +375,22 @@ pub fn refresh() !void {
     while (i < buffer.len) : (i += packet_size) {
         const end = @min(i + packet_size, buffer.len);
         try data(buffer[i..end]);
+    }
+}
+
+fn refreshSh1106() !void {
+    var page: u8 = 0;
+    while (page < 8) : (page += 1) {
+        try cmd(0xB0 | page);
+        try cmd(0x02);
+        try cmd(0x10);
+
+        const start = @as(usize, page) * width_us;
+        var offset: usize = 0;
+        while (offset < width_us) : (offset += packet_size) {
+            const end = @min(offset + packet_size, width_us);
+            try data(buffer[start + offset .. start + end]);
+        }
     }
 }
 

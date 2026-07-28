@@ -159,6 +159,8 @@ zig build -Dexample=blinky flash
 
 ## SSD1306 描画ヘルパ
 
+- `initPanelController(.ssd1306)` / `.ssd1309` / `.sh1106` で表示コントローラーを選択できます。
+- SH1106 選択時は I2C を 400kHz に設定し、128x64パネル向け2列オフセットのページ転送を使用します。
 - `initPanelWithOrientation(.portrait)` / `.landscape` / `.landscape_flip` / `.portrait_flip` で初期化時に論理画面の向きを指定できます。
 - `logicalWidth()` / `logicalHeight()` で現在の論理座標サイズを取得できます（縦画面では `64x128`）。
 - `drawStrRot` / `drawCharRot` / `drawImageRot` で `0/90/180/270` 回転表示ができます。
