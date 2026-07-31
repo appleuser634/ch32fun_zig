@@ -11,10 +11,6 @@ fn onButtonPress(line: u8) callconv(.c) void {
     fun.gpio.pin(.D, 0).toggle();
 }
 
-pub export fn _start() noreturn {
-    main();
-}
-
 pub fn main() noreturn {
     fun.system.init(.{});
     fun.gpio.enableAllClocks();

@@ -85,12 +85,25 @@ pub fn halModule(pkg: *std.Build) *std.Build.Module {
     });
 }
 
+pub const Runtime = enum {
+    /// ch32fun initializes memory/core state and installs the complete table.
+    ch32fun,
+    /// Compact unified/direct entry for EXTI7_0 as the sole enabled IRQ.
+    ch32fun_exti,
+    /// Legacy escape hatch: the application owns `_start` and all core state.
+    application,
+};
+
 pub const FirmwareOptions = struct {
     name: []const u8,
     root_source_file: std.Build.LazyPath,
     optimize: std.builtin.OptimizeMode = .ReleaseSmall,
     /// Override the default CH32V003 linker script.
     linker_script: ?std.Build.LazyPath = null,
+    /// Let ch32fun_zig own reset initialization and the interrupt vectors.
+    /// Keep `.application` only for legacy firmware that exports its own
+    /// `_start` and initializes all required machine state itself.
+    runtime: Runtime = .ch32fun,
 };
 
 /// Build a CH32V003 firmware executable with the HAL wired in.
@@ -105,13 +118,33 @@ pub fn addFirmware(
 ) *std.Build.Step.Compile {
     const pkg = if (dep) |d| d.builder else app_builder;
 
-    const root_module = app_builder.createModule(.{
+    const app_module = app_builder.createModule(.{
         .root_source_file = options.root_source_file,
         .target = ch32Target(app_builder),
         .optimize = options.optimize,
         .link_libc = false,
     });
-    root_module.addImport("ch32fun", halModule(pkg));
+    const hal = halModule(pkg);
+    app_module.addImport("ch32fun", hal);
+
+    const root_module = switch (options.runtime) {
+        .application => app_module,
+        .ch32fun, .ch32fun_exti => blk: {
+            const runtime_module = app_builder.createModule(.{
+                .root_source_file = pkg.path(switch (options.runtime) {
+                    .ch32fun => "src/firmware.zig",
+                    .ch32fun_exti => "src/firmware_exti.zig",
+                    .application => unreachable,
+                }),
+                .target = ch32Target(app_builder),
+                .optimize = options.optimize,
+                .link_libc = false,
+            });
+            runtime_module.addImport("app", app_module);
+            runtime_module.addImport("ch32fun", hal);
+            break :blk runtime_module;
+        },
+    };
 
     const exe = app_builder.addExecutable(.{
         .name = options.name,
@@ -134,6 +167,8 @@ pub fn build(b: *std.Build) void {
         std.debug.print("Unknown example '{s}'. Available: blinky, gpio_input, timer_irq, oled, persistent_counter, uart_hello, led_fade, tone_song, adc_meter, exti_button, compile_time_morse, state_machine_game, packed_settings, comptime_lookup, spi_loopback, uart_dma, ir_text, register_blinky\n", .{example_name});
         @panic("invalid example");
     };
+    const runtime = b.option(Runtime, "runtime", "Startup runtime: ch32fun, ch32fun_exti, or application") orelse
+        if (std.mem.eql(u8, selected.name, "exti_button")) Runtime.ch32fun else Runtime.application;
 
     const mkdir_step = b.addSystemCommand(&.{ "mkdir", "-p", "zig-out/firmware" });
 
@@ -143,6 +178,7 @@ pub fn build(b: *std.Build) void {
         .name = selected.name,
         .root_source_file = b.path(selected.path),
         .optimize = optimize,
+        .runtime = runtime,
     });
     exe.step.dependOn(&mkdir_step.step);
 

@@ -1,3 +1,6 @@
+/// Raw peripheral definitions used by the runtime and available for advanced
+/// firmware that needs a register not yet wrapped by a HAL API.
+pub const registers = @import("periph/registers.zig");
 pub const system = @import("system/system.zig");
 pub const gpio = @import("hal/gpio.zig");
 pub const time = @import("hal/time.zig");
