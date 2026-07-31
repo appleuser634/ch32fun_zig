@@ -48,6 +48,19 @@ pub const Rx = struct {
     active_low: bool = true,
 };
 
+/// Optional cooperative observer for inputs that must remain responsive while
+/// the bit-banged IR routines are waiting for or emitting pulses.
+pub const ActivityHook = *const fn () callconv(.c) void;
+var activity_hook: ?ActivityHook = null;
+
+pub fn setActivityHook(hook: ?ActivityHook) void {
+    activity_hook = hook;
+}
+
+fn observeActivity() void {
+    if (activity_hook) |hook| hook();
+}
+
 pub fn initTx(tx: Tx) void {
     gpio.enablePortClock(tx.pin.port);
     switch (tx.carrier_mode) {
@@ -284,11 +297,13 @@ fn mark(tx: Tx, duration_us: u32) void {
         },
     }
     setTx(tx, false);
+    observeActivity();
 }
 
 fn space(tx: Tx, duration_us: u32) void {
     setTx(tx, false);
     time.delayUs(duration_us);
+    observeActivity();
 }
 
 fn setTx(tx: Tx, active: bool) void {
@@ -342,6 +357,7 @@ fn measurePulse(rx: Rx, mark_level: bool, deadline: Deadline) Error!u32 {
 
     const start = time.nowCycles();
     while (isMark(rx) == mark_level) {
+        observeActivity();
         if (deadline.expired()) return Error.Timeout;
     }
     return time.elapsedUsSince(start);
@@ -349,6 +365,7 @@ fn measurePulse(rx: Rx, mark_level: bool, deadline: Deadline) Error!u32 {
 
 fn waitForLevel(rx: Rx, mark_level: bool, deadline: Deadline) Error!void {
     while (isMark(rx) != mark_level) {
+        observeActivity();
         if (deadline.expired()) return Error.Timeout;
     }
 }
