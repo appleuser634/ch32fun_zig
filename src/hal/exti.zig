@@ -13,8 +13,9 @@
 //!   fun.system.enableInterrupts();
 //!   ```
 //!
-//! ハンドラ本体は startup.zig の vector_table から `_exti7_0_irq_entry`
-//! 経由で呼ばれる。
+//! `addFirmware`の既定runtimeは、正規startupとvector tableを自動的に
+//! linkする。EXTIだけを使う容量制約の厳しいfirmwareでは
+//! `.runtime = .ch32fun_exti`でunified/direct entryを選択できる。
 
 const regs = @import("../periph/registers.zig");
 const gpio = @import("gpio.zig");
@@ -68,6 +69,9 @@ pub fn config(cfg: Config) void {
     }
 
     handlers[cfg.line] = cfg.handler;
+    // Do not deliver an edge latched while routing and trigger polarity were
+    // only partially configured.
+    e.INTFR = bit;
 }
 
 /// 割り込みを有効化する。 PFIC 側のラインも同時に立てる。
@@ -81,12 +85,18 @@ pub fn enable(line: u4) void {
 pub fn disable(line: u4) void {
     const e = regs.exti();
     e.INTENR &= ~(@as(u32, 1) << line);
+    // EXTI0..7 share one PFIC source. Disable it only after the final line is
+    // masked, and clear a stale controller-level pending state as well.
+    if ((e.INTENR & 0xff) == 0) {
+        regs.pficDisableIrq(regs.IrqExti7_0);
+        regs.pficClearPendingIrq(regs.IrqExti7_0);
+    }
 }
 
 /// 割り込みコンテキストから呼ばれる。 立っているフラグを 1 つずつ処理する。
 pub fn handleInterrupt() callconv(.c) void {
     const e = regs.exti();
-    var pending = e.INTFR;
+    var pending = e.INTFR & e.INTENR & 0xff;
     var i: u8 = 0;
     while (i < 8) : (i += 1) {
         const bit: u32 = @as(u32, 1) << @as(u5, @intCast(i));

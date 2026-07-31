@@ -414,3 +414,17 @@ pub fn pficEnableIrq(irqn: u8) void {
     const reg: *volatile u32 = @ptrFromInt(addr);
     reg.* = bit;
 }
+
+pub fn pficDisableIrq(irqn: u8) void {
+    const reg_index: usize = irqn / 32;
+    const bit: u32 = @as(u32, 1) << @as(u5, @intCast(irqn % 32));
+    const reg: *volatile u32 = @ptrFromInt(PFIC_BASE + 0x180 + (reg_index * 4));
+    reg.* = bit;
+}
+
+pub fn pficClearPendingIrq(irqn: u8) void {
+    const reg_index: usize = irqn / 32;
+    const bit: u32 = @as(u32, 1) << @as(u5, @intCast(irqn % 32));
+    const reg: *volatile u32 = @ptrFromInt(PFIC_BASE + 0x280 + (reg_index * 4));
+    reg.* = bit;
+}
