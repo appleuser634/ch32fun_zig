@@ -145,10 +145,23 @@ zig build -Dexample=blinky flash
   - SPI1 master full-duplex check; tie `MOSI` (`PC6`) to `MISO` (`PC7`) and the LED on `PD0` confirms the echo
 - `uart_dma`
   - Sends a message over USART1 via DMA1 ch4 while the CPU keeps blinking `PD0`
+- `hc_sr04`
+  - Measures distance with an HC-SR04 (`PD0` trigger, `PD1` echo) and reports millimetres over USART1
 - `ir_text`
   - Sends and receives short UTF-8 strings over a 38kHz IR LED link (`PD0` TX, `PD1` demodulated RX)
 - `register_blinky`
   - Blinks `PD0` by directly writing RCC / GPIOD / SysTick MMIO registers, without the GPIO/time HAL helpers
+
+## HC-SR04 Example Wiring
+
+- HC-SR04 `TRIG` -> `PD0`
+- HC-SR04 `ECHO` -> voltage divider / level shifter -> `PD1`
+- HC-SR04 `VCC` -> `5V`
+- HC-SR04 `GND` -> `GND`
+- USB-serial RX -> `PD5` (`115200` baud, 8N1)
+
+The HC-SR04 ECHO output is 5V logic. Do not connect it directly to the
+CH32V003; reduce it to 3.3V or below with a resistor divider or level shifter.
 
 ## OLED Example Wiring
 

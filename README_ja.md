@@ -141,10 +141,23 @@ zig build -Dexample=blinky flash
   - `packed struct(u32)` の設定を `@bitCast` + Flash `Slot(T)` で永続化
 - `comptime_lookup`
   - `comptime` で sin テーブルを `.rodata` に焼き、 PWM LED (PD2) で呼吸させる
+- `hc_sr04`
+  - HC-SR04 (`PD0` トリガー、`PD1` エコー) で距離を測り、USART1へmm単位で送出
 - `ir_text`
   - 38kHz 赤外線LEDリンクで短い UTF-8 文字列を送受信する (TX `PD0`, 復調済みRX `PD1`)
 - `register_blinky`
   - GPIO/time HAL を使わず、RCC / GPIOD / SysTick の MMIO レジスタ直接操作で `PD0` を点滅
+
+## HC-SR04 サンプル配線
+
+- HC-SR04 `TRIG` -> `PD0`
+- HC-SR04 `ECHO` -> 抵抗分圧またはレベルシフター -> `PD1`
+- HC-SR04 `VCC` -> `5V`
+- HC-SR04 `GND` -> `GND`
+- USBシリアル変換の RX -> `PD5`（115200bps、8N1）
+
+HC-SR04 の ECHO は 5V ロジックです。CH32V003へ直接接続せず、抵抗分圧
+またはレベルシフターで3.3V以下に落としてください。
 
 ## OLED サンプル配線
 
