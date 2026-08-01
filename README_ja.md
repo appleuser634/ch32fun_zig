@@ -183,7 +183,7 @@ HC-SR04 の ECHO は 5V ロジックです。CH32V003へ直接接続せず、抵
 - 基本図形として `drawLine` / `drawRect` / `fillRect` / `drawCircle` / `fillCircle` / `drawRoundRect` / `fillRoundRect` / `drawHLine` / `drawVLine` を追加しています。
 - 拡張ヘルパとして `drawLineThick` / `drawRectThick` / `drawCircleThick` / `drawRoundRectThick` / `drawFrame` / `drawRoundFrame` / `drawTriangle` / `fillTriangle` / `drawEllipse` / `fillEllipse` / `drawProgressBar` を追加しています。
 - `drawBitmapMasked` で同形式の 1bpp マスク付きスプライト描画ができます。
-- 実装は 1024 バイトの単一フレームバッファを維持し、回転用の追加バッファは持ちません。
+- 既定のフルバッファ方式は1,024バイトです。ルートソースへ `pub const ch32fun_ssd1306_buffer_mode = .page;` を宣言すると128バイトのページバッファになり、`firstPage()`から`nextPage()`がfalseになるまで同じ読み取り専用の画面を描画します。詳細は[SSD1306ページ描画](docs/ssd1306-page-rendering.md)を参照してください。
 
 ## ボタン入力ヘルパ
 

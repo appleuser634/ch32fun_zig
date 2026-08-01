@@ -6,6 +6,10 @@ pub const ch32fun_ssd1306_basic_ascii_font = if (@hasDecl(app, "ch32fun_ssd1306_
     app.ch32fun_ssd1306_basic_ascii_font
 else
     false;
+pub const ch32fun_ssd1306_buffer_mode = if (@hasDecl(app, "ch32fun_ssd1306_buffer_mode"))
+    app.ch32fun_ssd1306_buffer_mode
+else
+    .full;
 
 // Importing this module emits _start, the vector table and IRQ entries.
 const startup = @import("runtime/startup.zig");

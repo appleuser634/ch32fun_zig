@@ -185,7 +185,7 @@ Notes:
 - Basic primitives are available: `drawLine`, `drawRect`, `fillRect`, `drawCircle`, `fillCircle`, `drawRoundRect`, `fillRoundRect`, `drawHLine`, `drawVLine`.
 - Enhanced helpers include `drawLineThick`, `drawRectThick`, `drawCircleThick`, `drawRoundRectThick`, `drawFrame`, `drawRoundFrame`, `drawTriangle`, `fillTriangle`, `drawEllipse`, `fillEllipse`, and `drawProgressBar`.
 - `drawBitmapMasked` draws 1bpp sprites with a same-format 1bpp transparency mask.
-- The implementation still uses a single 1024-byte framebuffer and does not allocate an extra rotation buffer.
+- Full-buffer mode remains the default and uses 1,024 bytes. Declare `pub const ch32fun_ssd1306_buffer_mode = .page;` to select a 128-byte page buffer; render an immutable scene between `firstPage()` and repeated `nextPage()` calls. See [SSD1306 page rendering](docs/ssd1306-page-rendering.md).
 
 ## Button Input Helper
 

@@ -1,6 +1,7 @@
 const i2c = @import("i2c.zig");
 const font = @import("font8x8.zig");
 const root = @import("root");
+const builtin = @import("builtin");
 
 /// Opt-in compact font selection. Existing applications retain the full
 /// 256-glyph font unless they explicitly declare this root-level option.
@@ -8,6 +9,20 @@ const use_basic_ascii_font = if (@hasDecl(root, "ch32fun_ssd1306_basic_ascii_fon
     root.ch32fun_ssd1306_basic_ascii_font
 else
     false;
+
+/// Selects the persistent OLED drawing storage. `.page` uses 128 bytes and
+/// requires picture-loop rendering; `.full` retains the legacy 1,024 bytes.
+pub const BufferMode = enum {
+    full,
+    page,
+};
+
+pub const buffer_mode: BufferMode = if (builtin.is_test)
+    .page
+else if (@hasDecl(root, "ch32fun_ssd1306_buffer_mode"))
+    root.ch32fun_ssd1306_buffer_mode
+else
+    .full;
 
 pub const width: u8 = 128;
 pub const height: u8 = 64;
@@ -62,7 +77,42 @@ pub const TextExtent = struct {
     h: i16,
 };
 
-pub var buffer: [width_us * height_us / 8]u8 = [_]u8{0} ** (width_us * height_us / 8);
+pub const page_count: u8 = height / 8;
+pub const page_buffer_size: usize = width_us;
+
+/// A hardware-page-sized drawing buffer. Its 128 data bytes represent one
+/// 128x8 band; pixels outside `page` are clipped before array access.
+pub const PageBuffer = struct {
+    data: [page_buffer_size]u8 = [_]u8{0} ** page_buffer_size,
+    page: u3 = 0,
+
+    pub fn clear(self: *PageBuffer) void {
+        @memset(&self.data, 0);
+    }
+
+    pub fn topY(self: *const PageBuffer) u8 {
+        return @as(u8, self.page) * 8;
+    }
+
+    pub fn bottomY(self: *const PageBuffer) u8 {
+        return self.topY() + 7;
+    }
+
+    pub fn drawPixel(self: *PageBuffer, x: i16, y: i16, color: bool) void {
+        if (x < 0 or y < 0 or x >= width or y >= height) return;
+        const yu: u8 = @intCast(y);
+        if (yu / 8 != @as(u8, self.page)) return;
+        const mask = @as(u8, 1) << @as(u3, @intCast(yu & 7));
+        const xu: usize = @intCast(x);
+        if (color) self.data[xu] |= mask else self.data[xu] &= ~mask;
+    }
+};
+
+const active_buffer_size = if (buffer_mode == .page) page_buffer_size else width_us * height_us / 8;
+
+/// Active drawing storage: 128 bytes in `.page`, 1,024 bytes in `.full`.
+pub var buffer: [active_buffer_size]u8 = [_]u8{0} ** active_buffer_size;
+var current_page: u3 = 0;
 var current_orientation: Orientation = .landscape;
 var current_address: Address = .primary;
 var current_controller: Controller = .ssd1306;
@@ -163,6 +213,13 @@ fn cmd(command: u8) Error!void {
     try i2c.writeBlocking7bit(@intFromEnum(current_address), pkt[0..]);
 }
 
+fn cmds(commands: []const u8) Error!void {
+    var pkt: [7]u8 = undefined;
+    pkt[0] = 0x00;
+    @memcpy(pkt[1 .. 1 + commands.len], commands);
+    try i2c.writeBlocking7bit(@intFromEnum(current_address), pkt[0 .. 1 + commands.len]);
+}
+
 fn data(chunk: []const u8) Error!void {
     var pkt: [packet_size + 1]u8 = undefined;
     pkt[0] = 0x40;
@@ -185,7 +242,11 @@ fn mapPoint(x: i16, y: i16) ?struct { x: i16, y: i16 } {
 fn blendPhysicalPixel(x: i16, y: i16, src_on: bool, mode: DrawMode) void {
     const xu: usize = @intCast(x);
     const yu: usize = @intCast(y);
-    const addr = xu + @as(usize, width) * (yu / 8);
+    const physical_page = yu / 8;
+    if (comptime buffer_mode == .page) {
+        if (physical_page != @as(usize, current_page)) return;
+    }
+    const addr = xu + if (comptime buffer_mode == .page) 0 else @as(usize, width) * physical_page;
     const mask: u8 = @as(u8, 1) << @as(u3, @intCast(yu & 7));
     const dst_on = (buffer[addr] & mask) != 0;
 
@@ -322,8 +383,8 @@ pub fn initPanelAtAddressControllerWithOrientation(address: Address, controller_
     for (initCommands(controller_type)) |c| {
         try cmd(c);
     }
-    setbuf(false);
-    try refresh();
+    firstPage();
+    while (try nextPage()) {}
 }
 
 pub fn currentAddress() Address {
@@ -360,7 +421,48 @@ pub fn setbuf(color: bool) void {
     @memset(&buffer, if (color) 0xFF else 0x00);
 }
 
+/// Starts one picture loop and clears the active storage. In `.page` mode the
+/// caller must redraw the same immutable scene until `nextPage()` is false.
+pub fn firstPage() void {
+    current_page = 0;
+    setbuf(false);
+}
+
+/// Transfers the current picture-loop page. Returns true after advancing to
+/// another empty page, or false once the complete display has been sent.
+pub fn nextPage() !bool {
+    if (comptime buffer_mode == .full) {
+        try refresh();
+        return false;
+    }
+
+    try writePage(current_page, &buffer);
+    if (current_page == page_count - 1) return false;
+    current_page += 1;
+    setbuf(false);
+    return true;
+}
+
+/// Writes exactly one 128-byte GDDRAM page and hides controller addressing,
+/// column offsets, and I2C packetization from applications.
+pub fn writePage(page: u3, page_data: *const [page_buffer_size]u8) !void {
+    if (current_controller == .sh1106) {
+        const address_commands = [_]u8{ 0xB0 | @as(u8, page), 0x02, 0x10 };
+        try cmds(&address_commands);
+    } else {
+        const address_commands = [_]u8{ 0x21, 0, width - 1, 0x22, @as(u8, page), @as(u8, page) };
+        try cmds(&address_commands);
+    }
+
+    var offset: usize = 0;
+    while (offset < page_data.len) : (offset += packet_size) {
+        const end = @min(offset + packet_size, page_data.len);
+        try data(page_data[offset..end]);
+    }
+}
+
 pub fn refresh() !void {
+    if (comptime buffer_mode == .page) return writePage(current_page, &buffer);
     if (current_controller == .sh1106) return refreshSh1106();
 
     try cmd(0x21);
@@ -863,4 +965,77 @@ pub fn drawProgressBar(x: i16, y: i16, w: i16, h: i16, value: u16, max_value: u1
     if (fill_w > 0) {
         fillRect(x + 1, y + 1, fill_w, h - 2, fill_color);
     }
+}
+
+test "page buffer clips coordinates and maps boundary bits" {
+    const testing = @import("std").testing;
+    try testing.expectEqual(@as(usize, 128), buffer.len);
+
+    current_page = 0;
+    setbuf(false);
+    drawPixel(0, 0, true);
+    drawPixel(1, 7, true);
+    drawPixel(2, 8, true);
+    drawPixel(-1, 0, true);
+    drawPixel(128, 0, true);
+    drawPixel(0, 64, true);
+    try testing.expectEqual(@as(u8, 0x01), buffer[0]);
+    try testing.expectEqual(@as(u8, 0x80), buffer[1]);
+    try testing.expectEqual(@as(u8, 0x00), buffer[2]);
+
+    current_page = 1;
+    setbuf(false);
+    drawPixel(2, 8, true);
+    try testing.expectEqual(@as(u8, 0x01), buffer[2]);
+    drawPixel(2, 8, false);
+    try testing.expectEqual(@as(u8, 0x00), buffer[2]);
+}
+
+test "vertical line and glyph split cleanly across pages" {
+    const std = @import("std");
+    const testing = std.testing;
+
+    current_page = 0;
+    setbuf(false);
+    drawVLine(9, 7, 3, true);
+    try testing.expectEqual(@as(u8, 0x80), buffer[9]);
+    drawCharSz(16, 4, 'A', true, .x1);
+    const upper = buffer[16..24].*;
+
+    current_page = 1;
+    setbuf(false);
+    drawVLine(9, 7, 3, true);
+    try testing.expectEqual(@as(u8, 0x03), buffer[9]);
+    drawCharSz(16, 4, 'A', true, .x1);
+    const lower = buffer[16..24].*;
+
+    try testing.expect(!std.mem.allEqual(u8, &upper, 0));
+    try testing.expect(!std.mem.allEqual(u8, &lower, 0));
+
+    current_page = 1;
+    setbuf(false);
+    drawCharSz(32, 12, 'M', true, .x1);
+    const page_one = buffer[32..40].*;
+    current_page = 2;
+    setbuf(false);
+    drawCharSz(32, 12, 'M', true, .x1);
+    const page_two = buffer[32..40].*;
+    try testing.expect(!std.mem.allEqual(u8, &page_one, 0));
+    try testing.expect(!std.mem.allEqual(u8, &page_two, 0));
+}
+
+test "PageBuffer never writes outside its 128 data bytes" {
+    const std = @import("std");
+    const testing = std.testing;
+    var guarded = [_]PageBuffer{ .{}, .{}, .{} };
+    @memset(&guarded[0].data, 0xA5);
+    @memset(&guarded[2].data, 0x5A);
+    guarded[1].page = 3;
+    guarded[1].drawPixel(-1, 24, true);
+    guarded[1].drawPixel(128, 24, true);
+    guarded[1].drawPixel(0, 23, true);
+    guarded[1].drawPixel(127, 31, true);
+    try testing.expect(std.mem.allEqual(u8, &guarded[0].data, 0xA5));
+    try testing.expect(std.mem.allEqual(u8, &guarded[2].data, 0x5A));
+    try testing.expectEqual(@as(u8, 0x80), guarded[1].data[127]);
 }

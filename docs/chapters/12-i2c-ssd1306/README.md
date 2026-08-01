@@ -144,17 +144,36 @@ pub fn writeBlocking7bit(addr: u7, bytes: []const u8) Error!void {
 
 ## `src/hal/ssd1306.zig` を読む
 
-### フレームバッファのデザイン
+### フルバッファとページバッファ
 
 ```zig
 pub const width: u8 = 128;
 pub const height: u8 = 64;
-pub var buffer: [width_us * height_us / 8]u8 = [_]u8{0} ** (width_us * height_us / 8);
+pub const ch32fun_ssd1306_buffer_mode = .page; // application root
 ```
 
-- 128 × 64 = 8192 pixel。 1 ピクセル 1 bit なので `8192 / 8 = 1024` バイト。
-- SRAM は 2KB しか無く、その **半分をフレームバッファが占有する**。 シングルバッファだけ持つのはこの制約のため。
+- 128 × 64 = 8192 pixel。完成画像は `8192 / 8 = 1024` バイト。
+- 既定の`.full`は従来APIと互換で、1,024バイトを常駐させる。
+- `.page`は128×8 pixelだけを保持するため128バイト、差分896バイトを回収する。
 - 「縦 8 ピクセルが 1 バイト = 縦方向ストライプ」というレイアウト。 SSD1306 のページモード GDDRAM 配置 (YYYxxxxx) にそのまま合うので、 シリアル送信時に変換しなくて良い。
+
+ページ方式では次のpicture loopを使う。描画関数は8回呼ばれるため、状態更新や入力処理を
+loop内へ置かず、開始前に値または既存配列の有効sliceをsnapshotする。ページ外pixelは
+`blendPhysicalPixel`で配列アクセス前にclipされ、文字、縦線、矩形が境界をまたいでも、各pageを
+合成した最終表示はフルバッファ方式と同じになる。
+
+```zig
+fun.ssd1306.firstPage();
+while (true) {
+    drawScreen(snapshot);
+    if (!(try fun.ssd1306.nextPage())) break;
+}
+```
+
+`writePage()`はSSD1306/SSD1309の列・page範囲、SH1106の2列offset、32バイト単位のI2C転送を
+HAL内へ隠蔽する。`.full`では同じpicture-loop APIが描画を1回だけ実行して従来の`refresh()`を
+行うため、アプリはbuffer modeによる分岐を持たなくてよい。未選択bufferの配列はcomptimeで
+生成されず、ReleaseSmallの静的RAMへ含まれない。
 
 ### ピクセル描画
 
@@ -227,8 +246,8 @@ pub fn refresh() !void {
 ### 上位 API の役割分担
 
 - 描画系 (`drawPixel` / `drawLine` / `drawCircle` / `drawRoundRect` / ...) は **フレームバッファだけ** を触る
-- バス側を叩くのは `initI2c` / `initPanel` / `refresh` の 3 つだけ
-- アプリは描画関数で構図を組み立て、 最後に 1 回 `refresh()` する、 という「ダブルバッファ的」な書き口になる
+- バス側を叩くのは `initI2c` / `initPanel` / `refresh` / `nextPage` / `writePage`
+- full modeでは最後に1回`refresh()`、page modeではpicture loopからpageごとに転送する
 
 このおかげで、 描画コードは I2C のタイムアウトや状態遷移を意識せずに済む。 第 11 章で見た GPIO HAL より一段ドメインに近い API、 という位置付け。
 
@@ -258,7 +277,7 @@ fn rotatePoint(sx: i16, sy: i16, w: i16, h: i16, rotation: Rotation) struct { x:
 1. **下層は MCU の語彙のままに薄く写経**。 命名は基本的にデータシート通り。
 2. **上層はアプリ側のドメインに寄せる**。 ただし汎用化はしない。 「このプロジェクトの用途」で必要な分だけ作る。
 3. **割り込みやイベント駆動は最小限**。 タイミングが厳しくない箇所はビジーループ + タイムアウトでよしとする。
-4. **RAM は神聖**。 2KB しかないので、 描画バッファ 1 枚で全部こなす。 中間バッファは持たない。
+4. **RAM は神聖**。2KBしかない用途では128バイトpage bufferを選び、CPUで画面を8回再生成する。CPU/Flashを優先する用途はfull bufferを選べる。
 5. **エラーは Zig の `!T` で素直に上げる**。 SSD1306 側の `Error` は I2C の `Error` をそのまま採用 (`pub const Error = i2c.Error;`)。
 
 これらを通して読むと、 「組み込みの薄い HAL を Zig で書くなら、 だいたいこの粒度に落ち着くだろう」 という素朴な良いリファレンスになっている。
@@ -268,8 +287,8 @@ fn rotatePoint(sx: i16, sy: i16, w: i16, h: i16, rotation: Rotation) struct { x:
 ## まとめ
 
 - I2C はマスタ送信のみのブロッキング実装。 タイムアウト付きスピンウェイトで安全に止まれる
-- SSD1306 ドライバは 1024 バイトのシングルフレームバッファ + 32 バイト単位送信
-- 描画 API はフレームバッファのみを操作し、 バスは `refresh()` 1 箇所に集約
+- SSD1306ドライバは1,024バイトfullまたは128バイトpage bufferをcomptime選択できる
+- page modeは描画CPU時間と引き換えに896バイトを回収し、page転送をHALへ集約する
 - 回転処理はピクセル単位で計算し、 中間バッファを持たない方針で 2KB SRAM に収まるようにしてある
 
 ---
