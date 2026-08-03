@@ -6,13 +6,23 @@
  */
 MEMORY
 {
-    FLASH     (rx)  : ORIGIN = 0x08000000, LENGTH = 16K - 64
-    USER_DATA (r)   : ORIGIN = 0x08003FC0, LENGTH = 64
+    /* CH32V003 executes code through the zero-based FLASH alias after reset.
+       Linking at 0x08000000 breaks PC-relative addresses by 128 MiB. */
+    FLASH     (rx)  : ORIGIN = 0x00000000, LENGTH = 16K - 64
+    USER_DATA (r)   : ORIGIN = 0x00003FC0, LENGTH = 64
     RAM       (rwx) : ORIGIN = 0x20000000, LENGTH = 2K
 }
 
 SECTIONS
 {
+    /* Reset starts by executing at FLASH origin. With function sections,
+       _start would otherwise be placed after .vector_table. */
+    .reset :
+    {
+        KEEP(*(.reset_entry))
+        . = ALIGN(4);
+    } > FLASH
+
     .vector_table :
     {
         . = ALIGN(4);

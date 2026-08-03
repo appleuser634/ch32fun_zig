@@ -14,7 +14,7 @@ extern var _edata: u32;
 extern var _sidata: u32;
 extern var _stack_top: u32;
 
-pub export fn _start() callconv(.naked) noreturn {
+pub export fn _start() linksection(".reset_entry") callconv(.naked) noreturn {
     asm volatile (
         \\.option push
         \\.option norelax

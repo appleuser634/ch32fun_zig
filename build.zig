@@ -12,6 +12,7 @@ const examples = [_]Example{
     .{ .name = "oled", .path = "examples/oled/main.zig" },
     .{ .name = "persistent_counter", .path = "examples/persistent_counter/main.zig" },
     .{ .name = "uart_hello", .path = "examples/uart_hello/main.zig" },
+    .{ .name = "swio_log", .path = "examples/swio_log/main.zig" },
     .{ .name = "led_fade", .path = "examples/led_fade/main.zig" },
     .{ .name = "tone_song", .path = "examples/tone_song/main.zig" },
     .{ .name = "adc_meter", .path = "examples/adc_meter/main.zig" },
@@ -165,7 +166,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.option(std.builtin.OptimizeMode, "optimize", "Optimization mode") orelse .ReleaseSmall;
     const example_name = b.option([]const u8, "example", "Example to build") orelse "blinky";
     const selected = resolveExample(example_name) orelse {
-        std.debug.print("Unknown example '{s}'. Available: blinky, gpio_input, timer_irq, oled, persistent_counter, uart_hello, led_fade, tone_song, adc_meter, exti_button, compile_time_morse, state_machine_game, packed_settings, comptime_lookup, spi_loopback, uart_dma, hc_sr04, ir_text, register_blinky\n", .{example_name});
+        std.debug.print("Unknown example '{s}'. Available: blinky, gpio_input, timer_irq, oled, persistent_counter, uart_hello, swio_log, led_fade, tone_song, adc_meter, exti_button, compile_time_morse, state_machine_game, packed_settings, comptime_lookup, spi_loopback, uart_dma, hc_sr04, ir_text, register_blinky\n", .{example_name});
         @panic("invalid example");
     };
     const runtime = b.option(Runtime, "runtime", "Startup runtime: ch32fun, ch32fun_exti, or application") orelse

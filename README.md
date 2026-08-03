@@ -125,6 +125,8 @@ zig build -Dexample=blinky flash
   - Blinks the LED on `PD0` once per boot count, survives power cycles
 - `uart_hello`
   - Sends "hello" once per second over USART1 (PD5, 115200 8N1) via `fun.log`
+- `swio_log`
+  - Emits formatted SWIO logs for display by `minichlink -T`
 - `led_fade`
   - Breathing LED on `PD2` driven by TIM1_CH1 PWM
 - `tone_song`
@@ -151,6 +153,45 @@ zig build -Dexample=blinky flash
   - Sends and receives short UTF-8 strings over a 38kHz IR LED link (`PD0` TX, `PD1` demodulated RX)
 - `register_blinky`
   - Blinks `PD0` by directly writing RCC / GPIOD / SysTick MMIO registers, without the GPIO/time HAL helpers
+
+## SWIO print debugging
+
+`fun.swio_log` is compatible with the C ch32fun DebugPrintf protocol and emits
+formatted logs without consuming an extra UART pin. Debug builds enable it by
+default. To fit comfortably in 16 KiB, an optimized diagnostic build is recommended.
+The small-footprint formatter supports integer `{d}` and `{x}`, string `{s}`, and
+type-dependent `{}` placeholders.
+
+```zig
+pub const ch32fun_swio_log_enabled = true;
+
+fun.swio_log.init();
+fun.swio_log.waitForTerminal(); // When early boot logs must be captured
+fun.swio_log.info("value={d} flags=0x{x}", .{ value, flags });
+fun.swio_log.warn("waiting", .{});
+fun.swio_log.err("failed code={d}", .{code});
+```
+
+Build and flash, then start the terminal:
+
+```sh
+zig build -Dexample=swio_log -Doptimize=ReleaseSmall
+zig build -Dexample=swio_log -Doptimize=ReleaseSmall flash
+chzig minichlink -T
+```
+
+Without a root override, `swio_log.enabled` is compile-time false in `ReleaseSmall`,
+`ReleaseFast`, and `ReleaseSafe`. Every logging function becomes a no-op, and
+formatting code, strings, and DMDATA accesses are removed from the final image.
+Set the root declaration to false to remove logs from a Debug build as well.
+
+```zig
+if (fun.swio_log.enabled) fun.swio_log.info("debug only", .{});
+```
+
+Logging is blocking. Do not call it from an ISR or timing-sensitive code such as
+IR transmit/receive. `waitForTerminal()` prevents firmware progress until
+`minichlink -T` starts. PD1 is occupied by SWIO while the terminal is attached.
 
 ## HC-SR04 Example Wiring
 

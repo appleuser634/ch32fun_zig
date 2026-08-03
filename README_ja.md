@@ -125,6 +125,8 @@ zig build -Dexample=blinky flash
   - 電源を入れ直してもカウンタが残り、回数ぶん PD0 の LED が点滅
 - `uart_hello`
   - USART1 (PD5, 115200 8N1) に 1 秒おきに `[I] hello ...` を送出
+- `swio_log`
+  - SWIOへ整形ログを出力し、`minichlink -T`で表示
 - `led_fade`
   - TIM1_CH1 PWM で PD2 の LED を呼吸させる
 - `tone_song`
@@ -147,6 +149,45 @@ zig build -Dexample=blinky flash
   - 38kHz 赤外線LEDリンクで短い UTF-8 文字列を送受信する (TX `PD0`, 復調済みRX `PD1`)
 - `register_blinky`
   - GPIO/time HAL を使わず、RCC / GPIOD / SysTick の MMIO レジスタ直接操作で `PD0` を点滅
+
+## SWIOプリントデバッグ
+
+`fun.swio_log`はC版ch32funのDebugPrintfと互換性があり、追加のUARTピンなしで
+整形ログを出力できます。Debugビルドでは既定で有効です。16KBへ収めるため、
+実用時は次のroot宣言でログを明示的に有効化したReleaseSmallを推奨します。
+小型フォーマッタは整数の`{d}`・`{x}`、文字列の`{s}`、型に応じた`{}`を
+サポートします。
+
+```zig
+pub const ch32fun_swio_log_enabled = true;
+
+fun.swio_log.init();
+fun.swio_log.waitForTerminal(); // 起動直後のログを確実に捕捉する場合
+fun.swio_log.info("value={d} flags=0x{x}", .{ value, flags });
+fun.swio_log.warn("waiting", .{});
+fun.swio_log.err("failed code={d}", .{code});
+```
+
+ビルドして書き込んだ後、ターミナルを起動します。
+
+```sh
+zig build -Dexample=swio_log -Doptimize=ReleaseSmall
+zig build -Dexample=swio_log -Doptimize=ReleaseSmall flash
+chzig minichlink -T
+```
+
+root宣言がない`ReleaseSmall`、`ReleaseFast`、`ReleaseSafe`では`swio_log.enabled`が
+コンパイル時に`false`となります。各ログ関数はno-opになり、フォーマット処理、
+文字列、DMDATAアクセスは最終イメージから除去されます。明示宣言を`false`に
+すれば、Debugビルドからログを除去することもできます。
+
+```zig
+if (fun.swio_log.enabled) fun.swio_log.info("debug only", .{});
+```
+
+ログ出力はブロッキング式です。ISRや赤外線通信など時間制約のある処理内では
+使用しないでください。`waitForTerminal()`は`minichlink -T`が起動するまで処理を
+進めません。また、ターミナル接続中はPD1がSWIOに占有されます。
 
 ## HC-SR04 サンプル配線
 

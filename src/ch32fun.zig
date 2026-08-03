@@ -10,6 +10,7 @@ pub const input = @import("hal/input.zig");
 pub const flash = @import("hal/flash.zig");
 pub const uart = @import("hal/uart.zig");
 pub const log = @import("hal/log.zig");
+pub const swio_log = @import("hal/swio_log.zig");
 pub const pwm = @import("hal/pwm.zig");
 pub const tone = @import("hal/tone.zig");
 pub const adc = @import("hal/adc.zig");
